@@ -25,6 +25,7 @@
 
 # CMake build directory
 /build/
+/out/
 
 # Other generated files
 *.log

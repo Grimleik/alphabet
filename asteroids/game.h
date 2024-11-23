@@ -2,17 +2,22 @@
 /* ========================================================================
    Creator: Grimleik $
    TODO: 
-   * Vector math to normalize player speed.
-   * Draw images, using stb_image.h.
-   * Collision logic with asteroids and bullets.
+   * Full logic:
+      * Spawn asteroids with randomized movement.
+      * Collision logic with asteroids and bullets.
+      * Add score.
+      * Add lives.
+      * Add powerups.
+      * 
    * Add menu and game over screen.
+   * Draw images, using stb_image.h.
    * Add sound.
    * Add particles.
+   * Review Code and coding style.
    ========================================================================*/
 #define GAME_H
 
 #include "platform.h"
-
 
 void game_init(platform_state_t *state);
 void game_logic(platform_state_t *state);

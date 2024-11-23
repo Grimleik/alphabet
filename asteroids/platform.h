@@ -9,11 +9,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-typedef unsigned char u8;
-typedef int i32;
-typedef unsigned int u32;
-typedef float f32;
-typedef double f64;
+#include "core.h"
 
 #define KB(x) (x * 1024)
 #define MB(x) (KB(x) * 1024)
@@ -67,7 +63,6 @@ struct platform_state_t {
     u32 memorySize;
 };
 
-// Define the callback function typedef
 typedef void (*platform_callback_t)(platform_state_t *state);
 
 // PLATFORM API

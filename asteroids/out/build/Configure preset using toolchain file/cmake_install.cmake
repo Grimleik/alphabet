@@ -1,8 +1,8 @@
-# Install script for directory: /home/skuli-ubuntu/repos/alphabet/asteroids
+# Install script for directory: /root/repos/alphabet/asteroids
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/skuli-ubuntu/repos/alphabet/asteroids/out/install/Configure preset using toolchain file")
+  set(CMAKE_INSTALL_PREFIX "/root/repos/alphabet/asteroids/out/install/Configure preset using toolchain file")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/skuli-ubuntu/repos/alphabet/asteroids/out/build/Configure preset using toolchain file/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/root/repos/alphabet/asteroids/out/build/Configure preset using toolchain file/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

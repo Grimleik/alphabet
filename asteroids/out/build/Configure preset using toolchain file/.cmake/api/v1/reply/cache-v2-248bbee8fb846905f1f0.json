@@ -55,7 +55,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/skuli-ubuntu/repos/alphabet/asteroids/out/build/Configure preset using toolchain file"
+			"value" : "/root/repos/alphabet/asteroids/out/build/Configure preset using toolchain file"
 		},
 		{
 			"name" : "CMAKE_CACHE_MAJOR_VERSION",
@@ -499,7 +499,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/skuli-ubuntu/repos/alphabet/asteroids"
+			"value" : "/root/repos/alphabet/asteroids"
 		},
 		{
 			"name" : "CMAKE_INSTALL_PREFIX",
@@ -511,7 +511,7 @@
 				}
 			],
 			"type" : "PATH",
-			"value" : "/home/skuli-ubuntu/repos/alphabet/asteroids/out/install/Configure preset using toolchain file"
+			"value" : "/root/repos/alphabet/asteroids/out/install/Configure preset using toolchain file"
 		},
 		{
 			"name" : "CMAKE_INSTALL_SO_NO_EXE",
@@ -520,18 +520,6 @@
 				{
 					"name" : "HELPSTRING",
 					"value" : "Install .so files without execute permission."
-				}
-			],
-			"type" : "INTERNAL",
-			"value" : "1"
-		},
-		{
-			"name" : "CMAKE_LIB_ICE_HAS_ICECONNECTIONNUMBER",
-			"properties" : 
-			[
-				{
-					"name" : "HELPSTRING",
-					"value" : "Have library ICE"
 				}
 			],
 			"type" : "INTERNAL",
@@ -567,7 +555,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/home/skuli-ubuntu/anaconda3/bin/ninja"
+			"value" : "/usr/bin/ninja"
 		},
 		{
 			"name" : "CMAKE_MODULE_LINKER_FLAGS",
@@ -1135,7 +1123,7 @@
 				}
 			],
 			"type" : "PATH",
-			"value" : "/usr/include"
+			"value" : "X11_ICE_INCLUDE_PATH-NOTFOUND"
 		},
 		{
 			"name" : "X11_ICE_LIB",
@@ -1151,7 +1139,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/usr/lib/x86_64-linux-gnu/libICE.so"
+			"value" : "X11_ICE_LIB-NOTFOUND"
 		},
 		{
 			"name" : "X11_LIBRARIES",
@@ -1195,7 +1183,7 @@
 				}
 			],
 			"type" : "PATH",
-			"value" : "/usr/include"
+			"value" : "X11_SM_INCLUDE_PATH-NOTFOUND"
 		},
 		{
 			"name" : "X11_SM_LIB",
@@ -1211,7 +1199,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/usr/lib/x86_64-linux-gnu/libSM.so"
+			"value" : "X11_SM_LIB-NOTFOUND"
 		},
 		{
 			"name" : "X11_X11_INCLUDE_PATH",
@@ -1963,7 +1951,7 @@
 				}
 			],
 			"type" : "PATH",
-			"value" : "/usr/include"
+			"value" : "X11_Xt_INCLUDE_PATH-NOTFOUND"
 		},
 		{
 			"name" : "X11_Xt_LIB",
@@ -1979,7 +1967,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/usr/lib/x86_64-linux-gnu/libXt.so"
+			"value" : "X11_Xt_LIB-NOTFOUND"
 		},
 		{
 			"name" : "X11_Xtst_INCLUDE_PATH",
@@ -2391,7 +2379,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/skuli-ubuntu/repos/alphabet/asteroids/out/build/Configure preset using toolchain file"
+			"value" : "/root/repos/alphabet/asteroids/out/build/Configure preset using toolchain file"
 		},
 		{
 			"name" : "asteroids_IS_TOP_LEVEL",
@@ -2415,7 +2403,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/skuli-ubuntu/repos/alphabet/asteroids"
+			"value" : "/root/repos/alphabet/asteroids"
 		}
 	],
 	"kind" : "cache",
