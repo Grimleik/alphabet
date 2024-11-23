@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.build": "cpp",
+        "math.h": "c",
+        "platform.h": "c"
+    }
+}
