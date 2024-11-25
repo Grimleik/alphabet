@@ -24,8 +24,8 @@
 .vscode/
 
 # CMake build directory
-/build/
-/out/
+**/build/**
+**/out/**
 
 # Other generated files
 *.log
