@@ -95,7 +95,7 @@ void platform_start(platform_state_t *platform, platform_callback_t callback)
                 XKeyEvent *keyEvent = (XKeyEvent *)&event;
                 platform->activeInput->keys[keyEvent->keycode] =
                     event.type == KeyPress ? KEY_PRESSED : KEY_RELEASED;
-                printf("Keycode: %d changed to %d.\n", keyEvent->keycode, event.type == KeyPress ? KEY_PRESSED : KEY_RELEASED);
+                // printf("Keycode: %d changed to %d.\n", keyEvent->keycode, event.type == KeyPress ? KEY_PRESSED : KEY_RELEASED);
             }
         }
 
@@ -116,8 +116,6 @@ void platform_start(platform_state_t *platform, platform_callback_t callback)
 
         // Timing.
         currentTime = get_time_in_seconds();
-        platform->dt = currentTime - lastTime;
-        platform->totalTime += platform->dt;
 
         long sleep_ns = (TARGET_FRAME_DURATION - platform->dt) * 1e9;
         if (platform->dt < TARGET_FRAME_DURATION)
@@ -128,9 +126,10 @@ void platform_start(platform_state_t *platform, platform_callback_t callback)
             nanosleep(&sleep_time, NULL);
             // STUDY(pf): We must update our dt if we need to sleep!
             currentTime = get_time_in_seconds();
-            platform->dt = currentTime - lastTime;
         }
 
+        platform->dt = currentTime - lastTime;
+        platform->totalTime += platform->dt;
         lastTime = currentTime;
         // printf("FPS: %f %ld\n", 1.0f / platform->dt, sleep_ns);
     }

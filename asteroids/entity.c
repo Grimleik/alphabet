@@ -31,9 +31,10 @@ void entity_manager_init(entity_manager_t *em, int reserved)
    for (int i = 0; i < em->componentArrayCount; ++i)
    {
       component_array_t *ca = &em->componentArrays[i];
-      ca->count = 0;
+      // NOTE: 0 is 'null'.
+      ca->count = 1;
       // TODO: Decide on a size.
-      ca->components = (void *)malloc(sizeof(COMPONENT_SIZES[i]) * reserved);
+      ca->components = (void *)malloc(COMPONENT_SIZES[i] * reserved);
 
       // TODO: These needs to grow when entities grow.
       ca->lookUp = (int *)malloc(sizeof(int) * reserved);
@@ -68,3 +69,4 @@ void entity_manager_shutdown(entity_manager_t *em)
 DEFINE_COMPONENT_FUNCTIONS(position_t, EC_POSITION, COMPONENT_POSITION)
 DEFINE_COMPONENT_FUNCTIONS(velocity_t, EC_VELOCITY, COMPONENT_VELOCITY)
 DEFINE_COMPONENT_FUNCTIONS(health_t, EC_HEALTH, COMPONENT_HEALTH)
+DEFINE_COMPONENT_FUNCTIONS(collision_t, EC_COLLISION, COMPONENT_COLLISION)

@@ -1,9 +1,0 @@
-# ninja log v5
-0	2	0	clean	a31eedcededa8236
-29	97	1732388709680085806	asteroids	672b387bdac5a784
-0	29	1732388709610085813	CMakeFiles/asteroids.dir/game.c.o	b928667640fcdd5b
-0	22	1732388709600085812	CMakeFiles/asteroids.dir/entity.c.o	4d110cb6e299de74
-0	49	1732388677560089159	CMakeFiles/asteroids.dir/platform_linux.c.o	152a755f33cdde40
-0	22	1732388677540089159	CMakeFiles/asteroids.dir/main.c.o	72ecf128e3691dd6
-0	22	1732388742590082303	CMakeFiles/asteroids.dir/entity.c.o	4d110cb6e299de74
-22	70	1732388742630082299	asteroids	672b387bdac5a784

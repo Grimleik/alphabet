@@ -1,3 +1,0 @@
-/root/repos/alphabet/asteroids/out/build/Configure preset using toolchain file/CMakeFiles/asteroids.dir
-/root/repos/alphabet/asteroids/out/build/Configure preset using toolchain file/CMakeFiles/edit_cache.dir
-/root/repos/alphabet/asteroids/out/build/Configure preset using toolchain file/CMakeFiles/rebuild_cache.dir

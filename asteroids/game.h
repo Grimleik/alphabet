@@ -3,7 +3,6 @@
    Creator: Grimleik $
    TODO: 
    * Full logic:
-      * Spawn asteroids with randomized movement.
       * Collision logic with asteroids and bullets.
       * Add score.
       * Add lives.

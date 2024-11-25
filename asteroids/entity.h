@@ -36,22 +36,36 @@ struct health_t
     i32 health;
 };
 
+enum COLLISION_MASK
+{
+    CM_PLAYER = 1 << ET_PLAYER,
+    CM_ASTEROID = 1 << ET_ASTEROID,
+    CM_BULLET = 1 << ET_BULLET,
+};
+
+typedef struct collision_t collision_t;
+struct collision_t {
+    i32 mask;
+};
+
 // TODO(pf): This is a bit of a mess, but it works for now.
 enum COMPONENT_ID
 {
     COMPONENT_POSITION,
     COMPONENT_VELOCITY,
     COMPONENT_HEALTH,
+    COMPONENT_COLLISION,
     COMPONENT_ID_COUNT,
 };
-
 
 enum ENTITY_COMPONENTS
 {
     EC_POSITION = 1 << COMPONENT_POSITION,
     EC_VELOCITY = 1 << COMPONENT_VELOCITY,
     EC_HEALTH = 1 << COMPONENT_HEALTH,
+    EC_COLLISION = 1 << COMPONENT_COLLISION,
 };
+
 typedef struct entity_t entity_t;
 struct entity_t
 {
@@ -86,7 +100,7 @@ entity_t *entity_manager_create_entity(entity_manager_t *em);
 void entity_manager_shutdown(entity_manager_t *em);
 
 // TODO: Add bucket logic for components here, i.e arrays, sizes, freelist, etc. add them inside c function ?
-#define DECLARE_COMPONENT_FUNCTIONS(TYPE, COMPONENT)                                 \
+#define DECLARE_COMPONENT_FUNCTIONS(TYPE)                                 \
     TYPE *entity_add_##TYPE(entity_manager_t *em, entity_t *entity, TYPE component); \
     void entity_remove_##TYPE(entity_manager_t *em, entity_t *entity);               \
     TYPE *entity_get_##TYPE(entity_manager_t *em, entity_t *entity);
@@ -97,7 +111,7 @@ void entity_manager_shutdown(entity_manager_t *em);
         component_array_t *ca = &em->componentArrays[COMPONENT_ID];                 \
         int index;                                                                  \
         assert(!ca->lookUp[entity->id]);                                            \
-        if (ca->freeList)                                                           \
+        if (ca->freeListHead)                                                       \
         {                                                                           \
             index = ca->freeList[ca->freeListHead--];                               \
         }                                                                           \
@@ -107,7 +121,8 @@ void entity_manager_shutdown(entity_manager_t *em);
         }                                                                           \
         entity->componentMask |= COMPONENT;                                         \
         ca->lookUp[entity->id] = index;                                             \
-        ((TYPE *)ca->components)[index] = component;                                \
+        TYPE *rh = (TYPE *)ca->components + index;                                 \
+        *rh = component;                                                            \
         return (TYPE *)(ca->components) + index;                                    \
     }                                                                               \
     void entity_remove_##TYPE(entity_manager_t *em, entity_t *entity)               \
@@ -130,7 +145,8 @@ void entity_manager_shutdown(entity_manager_t *em);
         return NULL;                                                                \
     }
 
-DECLARE_COMPONENT_FUNCTIONS(position_t, EC_POSITION)
-DECLARE_COMPONENT_FUNCTIONS(velocity_t, EC_VELOCITY)
-DECLARE_COMPONENT_FUNCTIONS(health_t, EC_HEALTH)
+DECLARE_COMPONENT_FUNCTIONS(position_t)
+DECLARE_COMPONENT_FUNCTIONS(velocity_t)
+DECLARE_COMPONENT_FUNCTIONS(health_t)
+DECLARE_COMPONENT_FUNCTIONS(collision_t)
 #endif
