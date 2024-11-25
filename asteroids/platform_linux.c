@@ -93,9 +93,15 @@ void platform_start(platform_state_t *platform, platform_callback_t callback)
             if (event.type == KeyPress || event.type == KeyRelease)
             {
                 XKeyEvent *keyEvent = (XKeyEvent *)&event;
-                platform->activeInput->keys[keyEvent->keycode] =
-                    event.type == KeyPress ? KEY_PRESSED : KEY_RELEASED;
-                // printf("Keycode: %d changed to %d.\n", keyEvent->keycode, event.type == KeyPress ? KEY_PRESSED : KEY_RELEASED);
+                if (event.type == KeyPress)
+                {
+                    platform->activeInput->keys[keyEvent->keycode] = platform->lastInput->keys[keyEvent->keycode] != KEY_PRESSED ? KEY_PRESSED : KEY_DOWN;
+                }
+                else if (event.type == KeyRelease)
+                {
+                    platform->activeInput->keys[keyEvent->keycode] = platform->lastInput->keys[keyEvent->keycode] != KEY_RELEASED ? KEY_RELEASED : KEY_UP;
+                }
+                // printf("Keycode: %d changed to %d in event %d.\n", keyEvent->keycode, platform->activeInput->keys[keyEvent->keycode], event.type);
             }
         }
 

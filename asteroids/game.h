@@ -13,6 +13,8 @@
    * Add sound.
    * Add particles.
    * Review Code and coding style.
+      * Need to handle growing of entities and component arrays.
+      * Having a null entity/component means we have to start each loop from 1, a bit unintuitive.
    ========================================================================*/
 #define GAME_H
 

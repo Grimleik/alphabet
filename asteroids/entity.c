@@ -8,13 +8,51 @@
 #include "entity.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+#include "cu_math.h"
 
-// TODO: Having to extend this explicitly when we add a component type is not very nice
-size_t COMPONENT_SIZES[] = {
-    sizeof(position_t),
-    sizeof(velocity_t),
-    sizeof(health_t),
-};
+bool check_collision(collision_t *a, position_t *posA,
+                     collision_t *b, position_t *posB)
+{
+   if (a->type == CT_RECTANGLE && b->type == CT_RECTANGLE)
+   {
+      return abs(posA->x - posB->x) < (a->width + b->width) &&
+             abs(posA->y - posB->y) < (a->height + b->height);
+   }
+   else if (a->type == CT_CIRCLE && b->type == CT_CIRCLE)
+   {
+      vec2_t diff = {posA->x - posB->x, posA->y - posB->y};
+      return vec2_length(diff) < (a->width + b->width);
+   }
+   else if (a->type == CT_RECTANGLE && b->type == CT_CIRCLE)
+   {
+      f32 expRectHalfWidth = (a->width / 2) + b->width;
+      f32 expRectHalfHeight = (a->height / 2) + b->height;
+      f32 circleDistanceX = abs(posB->x - posA->x);
+      f32 circleDistanceY = abs(posB->y - posA->y);
+      if (circleDistanceX >= expRectHalfWidth ||
+          circleDistanceY >= expRectHalfHeight)
+      {
+         return false;
+      }
+
+      if (circleDistanceX < (a->width / 2) ||
+          circleDistanceY < (a->height / 2))
+      {
+         return true;
+      }
+
+      circleDistanceX -= a->width / 2;
+      circleDistanceY -= a->height / 2;
+      return (circleDistanceX * circleDistanceX + circleDistanceY * circleDistanceY) < (b->width * b->width);
+   }
+   else if (a->type == CT_CIRCLE && b->type == CT_RECTANGLE)
+   {
+      return check_collision(b, posB, a, posA);
+   }
+   assert(false && "Invalid collision type.");
+   return false;
+}
 
 void entity_manager_init(entity_manager_t *em, int reserved)
 {
@@ -22,6 +60,7 @@ void entity_manager_init(entity_manager_t *em, int reserved)
    em->reservedEntityCount = reserved;
    // 0 is "null".
    em->entityCount = 1;
+   em->entitiesFreeList = NULL;
 
    em->entities = (entity_t *)malloc(sizeof(entity_t) * reserved);
    memset(em->entities, 0, sizeof(entity_t) * reserved);
@@ -43,14 +82,52 @@ void entity_manager_init(entity_manager_t *em, int reserved)
       memset(ca->freeList, 0, sizeof(int) * reserved);
       ca->freeListHead = 0;
    }
+
+   em->eventMaxCount = 1024;
+   em->events = (entity_event *)malloc(sizeof(entity_event) * em->eventMaxCount);
+   em->eventCount = 0;
 }
 
 entity_t *entity_manager_create_entity(entity_manager_t *em)
 {
-   entity_t *result = &em->entities[em->entityCount];
-   result->id = em->entityCount;
-   em->entityCount++;
+   entity_t *result = em->entitiesFreeList;
+   if (!result)
+   {
+      result = &em->entities[em->entityCount];
+      result->id = em->entityCount;
+      em->entityCount++;
+      printf("Creating entity: %d\n", result->id);
+   }
+   else
+   {
+      printf("Reusing entity: %d\n", result->id);
+      em->entitiesFreeList = em->entitiesFreeList->next;
+   }
    return result;
+}
+
+entity_t *entity_manager_get_entity(entity_manager_t *em, i32 id)
+{
+   return &em->entities[id];
+}
+
+void entity_manager_destroy_entity(entity_manager_t *em, entity_t *entity)
+{
+   for (int i = 0; i < em->componentArrayCount; ++i)
+   {
+      component_array_t *ca = &em->componentArrays[i];
+      if (entity->componentMask & (1 << i))
+      {
+         int index = ca->lookUp[entity->id];
+         assert(index);
+         ca->lookUp[entity->id] = 0;
+         entity->componentMask &= ~(1 << i);
+         ca->freeList[++ca->freeListHead] = index;
+      }
+   }
+   printf("Destroying entity: %d\n", entity->id);
+   entity->next = em->entitiesFreeList;
+   em->entitiesFreeList = entity;
 }
 
 void entity_manager_shutdown(entity_manager_t *em)
@@ -65,6 +142,52 @@ void entity_manager_shutdown(entity_manager_t *em)
    free(em->componentArrays);
    free(em->entities);
 }
+
+// void entity_manager_add_event(entity_manager_t *em, entity_event event)
+// {
+//    assert(em->eventCount < em->eventMaxCount);
+//    em->events[em->eventCount++] = event;
+// }
+
+// void entity_manager_process_events(entity_manager_t *em)
+// {
+//    for (int i = 0; i < em->eventCount; ++i)
+//    {
+//       entity_event *event = &em->events[i];
+//       switch (event->type)
+//       {
+//       case ENTITY_EVENT_COLLISION:
+//       {
+//          entity_event_collision_t *collisionEvent = (entity_event_collision_t *)event;
+//          entity_t *entityA = &em->entities[collisionEvent->entityA];
+//          entity_t *entityB = &em->entities[collisionEvent->entityB];
+//          if (entityA->componentMask & EC_HEALTH)
+//          {
+//             health_t *health = entity_get_health_t(em, entityA);
+//             health->health -= 1;
+//             if (health->health <= 0)
+//             {
+//                // TODO: Handle removal of health component.
+//                entityA->componentMask = 0;
+//             }
+//          }
+//          if (entityB->componentMask & EC_HEALTH)
+//          {
+
+//             health_t *health = entity_get_health_t(em, entityB);
+//             health->health -= 1;
+//             if (health->health <= 0)
+//             {
+//                // TODO: Handle removal of health component.
+//                entityB->componentMask = 0;
+//             }
+//          }
+//       }
+//       break;
+//       }
+//    }
+//    em->eventCount = 0;
+// }
 
 DEFINE_COMPONENT_FUNCTIONS(position_t, EC_POSITION, COMPONENT_POSITION)
 DEFINE_COMPONENT_FUNCTIONS(velocity_t, EC_VELOCITY, COMPONENT_VELOCITY)
