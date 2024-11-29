@@ -143,6 +143,8 @@ void spawn_bullet(game_state_t *gameState)
     col->mask = CM_ASTEROID;
     col->width = BULLET_WIDTH * 10;
     col->height = BULLET_HEIGHT * 10;
+    health_t *health = entity_add_health_t(&gameState->entityManager, bullet);
+    health->health = 1;
 }
 
 void game_state_shutdown(game_state_t *gameState)
@@ -176,6 +178,19 @@ void game_init(platform_state_t *state)
     spawn_player(gameState, state->render->width / 2, state->render->height / 2);
 
     gameState->asteroidCount = 0;
+}
+
+static void entity_modify_health(game_state_t *gameState, entity_t* entity, health_t *health, i32 amount)
+{
+    health->health += amount;
+    if (health->health <= 0)
+    {
+        entity_manager_destroy_entity(&gameState->entityManager, entity);
+        if (entity->type == ET_ASTEROID)
+        {
+            gameState->asteroidCount--;
+        }
+    }
 }
 
 void game_logic(platform_state_t *state)
@@ -363,19 +378,12 @@ void game_logic(platform_state_t *state)
                 collision = true;
                 // gameState->paused = true;
                 printf("Entity %d colliding with %d\n", entityA->id, entityB->id);
-                health_t *health = entity_get_health_t(&gameState->entityManager, entityA);
-                if (health)
-                {
-                    health->health -= 1;
-                    if (health->health <= 0)
-                    {
-                        entity_manager_destroy_entity(&gameState->entityManager, entityA);
-                        if (entityA->type == ET_ASTEROID)
-                        {
-                            gameState->asteroidCount--;
-                        }
-                    }
-                }
+                health_t *healthA = entity_get_health_t(&gameState->entityManager, entityA);
+                health_t *healthB = entity_get_health_t(&gameState->entityManager, entityB);
+                if (healthA)
+                    entity_modify_health(gameState, entityA, healthA, -1);
+                if (healthB)
+                    entity_modify_health(gameState, entityB, healthB, -1);
             }
 
             // Check B
@@ -387,19 +395,12 @@ void game_logic(platform_state_t *state)
 
                 push_draw_command(gameState->drawCommands, &gameState->drawCommandCount,
                                   (draw_command_t){DCT_RECTANGLE, tB->pos.x, tB->pos.y, colB->width + colA->width, colB->height + colA->height, COLLISION_OUTLINE_COLOR, false});
-                health_t *health = entity_get_health_t(&gameState->entityManager, entityB);
-                if (health)
-                {
-                    health->health -= 1;
-                    if (health->health <= 0)
-                    {
-                        entity_manager_destroy_entity(&gameState->entityManager, entityB);
-                        if (entityB->type == ET_ASTEROID)
-                        {
-                            gameState->asteroidCount--;
-                        }
-                    }
-                }
+                health_t *healthA = entity_get_health_t(&gameState->entityManager, entityA);
+                health_t *healthB = entity_get_health_t(&gameState->entityManager, entityB);
+                if (healthA)
+                    entity_modify_health(gameState, entityA, healthA, -1);
+                if (healthB)
+                    entity_modify_health(gameState, entityB, healthB, -1);
             }
 
             if (collision)
