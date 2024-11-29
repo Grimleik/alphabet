@@ -5,7 +5,6 @@
 
 /* TODO:
  * Linux:
- * Second pass on input. Tripple buffer to implement input held ?
  */
 #define PLATFORM_SHARED_H
 #include <stdbool.h>
@@ -24,8 +23,6 @@ enum KEY_STATES
 {
     KEY_UP = 0,
     KEY_DOWN = 1,
-    KEY_PRESSED = 2,
-    KEY_RELEASED = 3
 };
 
 enum KEYS
@@ -43,12 +40,19 @@ enum KEYS
     KEY_DOWN_ARROW = 116,
     KEY_ENTER = 36,
     KEY_BACKSPACE = 22,
-    _COUNT = 256,
+    KEY_COUNT = 256,
 };
 
-typedef struct platform_input_t platform_input_t;
-struct platform_input_t
+// typedef struct key_state_t key_state_t;
+// struct key_state_t {
+//     i32 state;
+//     i32 transitions;
+// };
+
+typedef struct platform_input_buffer_t platform_input_buffer_t;
+struct platform_input_buffer_t
 {
+    // key_state_t keys[256];
     int keys[256];
 };
 
@@ -62,18 +66,30 @@ struct render_state_t
     int bytesPerPixel;
 };
 
+#define NR_OF_INPUT_BUFFERS 3
+typedef struct platform_input_t platform_input_t;
+struct platform_input_t {
+    platform_input_buffer_t buffers[NR_OF_INPUT_BUFFERS];
+    i32 activeInputBuffer;
+};
+
+
 typedef struct platform_state_t platform_state_t;
 struct platform_state_t
 {
     bool isRunning;
     void *handle;
+    u64 frame;
     f64 dt;
     f64 totalTime;
 
     render_state_t *render;
+    platform_input_t *input;
+    
     // TODO: Concat into one structure.
-    platform_input_t *activeInput;
-    platform_input_t *lastInput;
+    // platform_input_t *activeInput;
+    // platform_input_t *activeInput;
+    // platform_input_t *lastInput;
 
     void *memory;
     u32 memorySize;
@@ -90,5 +106,9 @@ typedef void (*platform_callback_t)(platform_state_t *state);
 platform_state_t *platform_init(platform_callback_t callback);
 void platform_start(platform_state_t *platform, platform_callback_t callback);
 void platform_shutdown(platform_state_t **platform_state, platform_callback_t callback);
+bool input_is_key_down(platform_state_t *platform, int key);
+bool input_is_key_pressed(platform_state_t *platform, int key);
+bool input_is_key_released(platform_state_t *platform, int key);
+// void platform_advance_input(platform_state_t *platform);
 
 #endif

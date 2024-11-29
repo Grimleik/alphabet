@@ -18,18 +18,14 @@ enum ENTITY_TYPES
     ET_BULLET,
 };
 
-typedef struct position_t position_t;
-struct position_t
+typedef struct transform_t transform_t;
+struct transform_t
 {
-    f32 x, y;
+    vec2_t pos;
+    vec2_t vel;
+    vec2_t drag;
+    vec2_t dir;
     // f32 prevX, prevY;
-};
-
-typedef struct velocity_t velocity_t;
-struct velocity_t
-{
-    f32 x, y;
-    f32 dragX, dragY;
 };
 
 typedef struct health_t health_t;
@@ -60,12 +56,11 @@ struct collision_t
     bool colliding;
 };
 
-bool check_collision(collision_t *a, position_t *posA, collision_t *b, position_t *posB);
+bool check_collision(collision_t *a, transform_t *posA, collision_t *b, transform_t *posB);
 
 enum COMPONENT_ID
 {
-    COMPONENT_POSITION,
-    COMPONENT_VELOCITY,
+    COMPONENT_TRANSFORM,
     COMPONENT_HEALTH,
     COMPONENT_COLLISION,
     COMPONENT_ID_COUNT,
@@ -73,16 +68,14 @@ enum COMPONENT_ID
 
 // STUDY: Can we create this automagically ?
 static const size_t COMPONENT_SIZES[COMPONENT_ID_COUNT] = {
-    sizeof(position_t),
-    sizeof(velocity_t),
+    sizeof(transform_t),
     sizeof(health_t),
     sizeof(collision_t),
 };
 
 enum ENTITY_COMPONENTS
 {
-    EC_POSITION = 1 << COMPONENT_POSITION,
-    EC_VELOCITY = 1 << COMPONENT_VELOCITY,
+    EC_TRANSFORM = 1 << COMPONENT_TRANSFORM,
     EC_HEALTH = 1 << COMPONENT_HEALTH,
     EC_COLLISION = 1 << COMPONENT_COLLISION,
 };
@@ -152,13 +145,13 @@ void entity_manager_shutdown(entity_manager_t *em);
 
 // TODO: Add bucket logic for components here, i.e arrays, sizes, freelist, etc. add them inside c function ?
 // TODO: Implement a way to retrieve with only id instead of entity ptrs ?
-#define DECLARE_COMPONENT_FUNCTIONS(TYPE)                                            \
-    TYPE *entity_add_##TYPE(entity_manager_t *em, entity_t *entity, TYPE component); \
-    void entity_remove_##TYPE(entity_manager_t *em, entity_t *entity);               \
+#define DECLARE_COMPONENT_FUNCTIONS(TYPE)                              \
+    TYPE *entity_add_##TYPE(entity_manager_t *em, entity_t *entity);   \
+    void entity_remove_##TYPE(entity_manager_t *em, entity_t *entity); \
     TYPE *entity_get_##TYPE(entity_manager_t *em, entity_t *entity);
 
 #define DEFINE_COMPONENT_FUNCTIONS(TYPE, COMPONENT, COMPONENT_ID)                                          \
-    TYPE *entity_add_##TYPE(entity_manager_t *em, entity_t *entity, TYPE component)                        \
+    TYPE *entity_add_##TYPE(entity_manager_t *em, entity_t *entity)                                        \
     {                                                                                                      \
         component_array_t *ca = &em->componentArrays[COMPONENT_ID];                                        \
         int index;                                                                                         \
@@ -175,7 +168,7 @@ void entity_manager_shutdown(entity_manager_t *em);
         entity->componentMask |= COMPONENT;                                                                \
         ca->lookUp[entity->id] = index;                                                                    \
         TYPE *rh = (TYPE *)ca->components + index;                                                         \
-        *rh = component;                                                                                   \
+        *rh = (TYPE){0};                                                                                   \
         return (TYPE *)(ca->components) + index;                                                           \
     }                                                                                                      \
     void entity_remove_##TYPE(entity_manager_t *em, entity_t *entity)                                      \
@@ -198,8 +191,7 @@ void entity_manager_shutdown(entity_manager_t *em);
         return NULL;                                                                                       \
     }
 
-DECLARE_COMPONENT_FUNCTIONS(position_t)
-DECLARE_COMPONENT_FUNCTIONS(velocity_t)
+DECLARE_COMPONENT_FUNCTIONS(transform_t)
 DECLARE_COMPONENT_FUNCTIONS(health_t)
 DECLARE_COMPONENT_FUNCTIONS(collision_t)
 #endif

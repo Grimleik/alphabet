@@ -28,4 +28,14 @@ static inline vec2_t vec2_normalize(vec2_t v)
     return (vec2_t){v.x / length, v.y / length};
 }
 
+static inline vec2_t vec2_mul_s(vec2_t v, f32 s)
+{
+    return (vec2_t){v.x * s, v.y * s};
+}
+
+static inline vec2_t vec2_add_v(vec2_t a, vec2_t b)
+{
+    return (vec2_t){a.x + b.x, a.y + b.y};
+}
+
 #endif

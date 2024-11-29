@@ -4,7 +4,9 @@
    TODO: 
    * Full logic:
       * Collision logic with asteroids and bullets.
+         * Spawn Bullets.
       * Add score.
+      * Implement steering logic.
       * Add lives.
       * Add powerups.
       * 

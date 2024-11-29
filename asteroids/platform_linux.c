@@ -15,6 +15,11 @@
 #define TARGET_FRAME_DURATION (1.0 / TARGET_FPS)
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
+static int wrap(int value, int max)
+{
+    return (value + max) % max;
+}
+
 int x11_error_handler(Display *display, XErrorEvent *error)
 {
     char error_text[1024];
@@ -76,6 +81,7 @@ void platform_start(platform_state_t *platform, platform_callback_t callback)
     int status;
     render_state_t *render = platform->render;
     linux_state_t *state = (linux_state_t *)platform->handle;
+    platform->frame = 0;
 
     XImage *image = XCreateImage(
         state->display, DefaultVisual(state->display, state->screen),
@@ -93,15 +99,31 @@ void platform_start(platform_state_t *platform, platform_callback_t callback)
             if (event.type == KeyPress || event.type == KeyRelease)
             {
                 XKeyEvent *keyEvent = (XKeyEvent *)&event;
-                if (event.type == KeyPress)
+                platform_input_buffer_t *buffer = platform->input->buffers + platform->input->activeInputBuffer;
+                platform_input_buffer_t *prevBuffer = platform->input->buffers + wrap(platform->input->activeInputBuffer - 1, NR_OF_INPUT_BUFFERS);
+                // if (buffer->keys[keyEvent->keycode].transitions == 0)
                 {
-                    platform->activeInput->keys[keyEvent->keycode] = platform->lastInput->keys[keyEvent->keycode] != KEY_PRESSED ? KEY_PRESSED : KEY_DOWN;
+                    if (event.type == KeyPress)
+                    {
+                        buffer->keys[keyEvent->keycode] = KEY_DOWN;
+                        // buffer->keys[keyEvent->keycode].state = KEY_DOWN;
+                        // buffer->keys[keyEvent->keycode].transitions++;
+                    }
+                    else if (event.type == KeyRelease)
+                    {
+
+                        buffer->keys[keyEvent->keycode] = KEY_UP;
+                        // buffer->keys[keyEvent->keycode].state = KEY_UP;
+                        // buffer->keys[keyEvent->keycode].transitions++;
+                    }
+
+                    // printf("Frame %ld: Keycode: %d changed from %d to %d in event %d.\n",
+                    //        platform->frame,
+                    //        keyEvent->keycode,
+                    //        prevBuffer->keys[keyEvent->keycode],
+                    //        buffer->keys[keyEvent->keycode],
+                    //        event.type);
                 }
-                else if (event.type == KeyRelease)
-                {
-                    platform->activeInput->keys[keyEvent->keycode] = platform->lastInput->keys[keyEvent->keycode] != KEY_RELEASED ? KEY_RELEASED : KEY_UP;
-                }
-                // printf("Keycode: %d changed to %d in event %d.\n", keyEvent->keycode, platform->activeInput->keys[keyEvent->keycode], event.type);
             }
         }
 
@@ -116,9 +138,11 @@ void platform_start(platform_state_t *platform, platform_callback_t callback)
         status = XFlush(state->display);
 
         // Input swap.
-        memcpy(platform->lastInput->keys, platform->activeInput->keys,
+
+        platform->input->activeInputBuffer = wrap(platform->input->activeInputBuffer + 1, NR_OF_INPUT_BUFFERS);
+        memcpy(&platform->input->buffers[platform->input->activeInputBuffer],
+               &platform->input->buffers[wrap(platform->input->activeInputBuffer - 1, NR_OF_INPUT_BUFFERS)],
                sizeof(int) * 256);
-        // memset(platform->activeInput->keys, 0, sizeof(int) * 256);
 
         // Timing.
         currentTime = get_time_in_seconds();
@@ -137,6 +161,7 @@ void platform_start(platform_state_t *platform, platform_callback_t callback)
         platform->dt = currentTime - lastTime;
         platform->totalTime += platform->dt;
         lastTime = currentTime;
+        platform->frame++;
         // printf("FPS: %f %ld\n", 1.0f / platform->dt, sleep_ns);
     }
 }
@@ -152,4 +177,25 @@ void platform_shutdown(platform_state_t **platform_state,
     free((*platform_state)->handle);
     free(*platform_state);
     *platform_state = NULL;
+}
+
+bool input_is_key_down(platform_state_t *platform, int key)
+{
+    return platform->input->buffers[platform->input->activeInputBuffer].keys[key] != KEY_UP;
+}
+
+bool input_is_key_pressed(platform_state_t *platform, int key)
+{
+    i32 wrapnr = wrap(platform->input->activeInputBuffer - 1, NR_OF_INPUT_BUFFERS);
+    bool b1 = platform->input->buffers[platform->input->activeInputBuffer].keys[key] == KEY_DOWN;
+    bool b2 = platform->input->buffers[wrapnr].keys[key] == KEY_UP;
+    return b1 && b2;
+    // return &&
+    //        platform->input->buffers[wrapnr].keys[key] != KEY_DOWN;
+}
+
+bool input_is_key_released(platform_state_t *platform, int key)
+{
+    return platform->input->buffers[wrap(platform->input->activeInputBuffer - 1, NR_OF_INPUT_BUFFERS)].keys[key] == KEY_DOWN &&
+           platform->input->buffers[platform->input->activeInputBuffer].keys[key] == KEY_UP;
 }

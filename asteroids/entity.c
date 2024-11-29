@@ -11,25 +11,25 @@
 #include <stdio.h>
 #include "cu_math.h"
 
-bool check_collision(collision_t *a, position_t *posA,
-                     collision_t *b, position_t *posB)
+bool check_collision(collision_t *a, transform_t *tA,
+                     collision_t *b, transform_t *tB)
 {
    if (a->type == CT_RECTANGLE && b->type == CT_RECTANGLE)
    {
-      return abs(posA->x - posB->x) < (a->width + b->width) &&
-             abs(posA->y - posB->y) < (a->height + b->height);
+      return abs(tA->pos.x - tB->pos.x) < (a->width + b->width) &&
+             abs(tA->pos.y - tB->pos.y) < (a->height + b->height);
    }
    else if (a->type == CT_CIRCLE && b->type == CT_CIRCLE)
    {
-      vec2_t diff = {posA->x - posB->x, posA->y - posB->y};
+      vec2_t diff = {tA->pos.x - tB->pos.x, tA->pos.y - tB->pos.y};
       return vec2_length(diff) < (a->width + b->width);
    }
    else if (a->type == CT_RECTANGLE && b->type == CT_CIRCLE)
    {
       f32 expRectHalfWidth = (a->width / 2) + b->width;
       f32 expRectHalfHeight = (a->height / 2) + b->height;
-      f32 circleDistanceX = abs(posB->x - posA->x);
-      f32 circleDistanceY = abs(posB->y - posA->y);
+      f32 circleDistanceX = abs(tB->pos.x - tA->pos.x);
+      f32 circleDistanceY = abs(tB->pos.y - tA->pos.y);
       if (circleDistanceX >= expRectHalfWidth ||
           circleDistanceY >= expRectHalfHeight)
       {
@@ -48,7 +48,7 @@ bool check_collision(collision_t *a, position_t *posA,
    }
    else if (a->type == CT_CIRCLE && b->type == CT_RECTANGLE)
    {
-      return check_collision(b, posB, a, posA);
+      return check_collision(b, tB, a, tA);
    }
    assert(false && "Invalid collision type.");
    return false;
@@ -189,7 +189,6 @@ void entity_manager_shutdown(entity_manager_t *em)
 //    em->eventCount = 0;
 // }
 
-DEFINE_COMPONENT_FUNCTIONS(position_t, EC_POSITION, COMPONENT_POSITION)
-DEFINE_COMPONENT_FUNCTIONS(velocity_t, EC_VELOCITY, COMPONENT_VELOCITY)
+DEFINE_COMPONENT_FUNCTIONS(transform_t, EC_TRANSFORM, COMPONENT_TRANSFORM)
 DEFINE_COMPONENT_FUNCTIONS(health_t, EC_HEALTH, COMPONENT_HEALTH)
 DEFINE_COMPONENT_FUNCTIONS(collision_t, EC_COLLISION, COMPONENT_COLLISION)
