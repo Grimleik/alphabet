@@ -20,12 +20,19 @@
 *.out
 *.app
 
-# VSCode settings
+# Folders
+
+## VSCode settings
 .vscode/
 
-# CMake build directory
+## CMake build directory
 **/build/**
 **/out/**
+
+## Submodules 
+**/external/**
+**/**test**/**
+**/**tmp**/**
 
 # Other generated files
 *.log

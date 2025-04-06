@@ -1,0 +1,13 @@
+[X] Make it compile and run on Windows. [X]
+	[~] .. and again on Linux :D
+[~] Start porting over from C to C++. 
+[ ] Create a threading library that I can entertain the idea of starting, stopping
+and shutting down without having running threads active. 
+
+[ ] System ideas:
+	[ ] Memory adapation system:
+		* Need a settings file to perm. store what memory requirement the system
+		needs so I can load and adapt the system for next run.
+
+[ ] Ask the copilot to generate a test suite for my CMake Project and some skeleton
+to test some functionality.

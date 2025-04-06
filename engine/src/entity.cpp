@@ -16,8 +16,8 @@ bool check_collision(collision_t *a, transform_t *tA,
 {
    if (a->type == CT_RECTANGLE && b->type == CT_RECTANGLE)
    {
-      return abs(tA->pos.x - tB->pos.x) < (a->width + b->width) &&
-             abs(tA->pos.y - tB->pos.y) < (a->height + b->height);
+      return fabs(tA->pos.x - tB->pos.x) < (a->width + b->width) &&
+             fabs(tA->pos.y - tB->pos.y) < (a->height + b->height);
    }
    else if (a->type == CT_CIRCLE && b->type == CT_CIRCLE)
    {
@@ -26,10 +26,10 @@ bool check_collision(collision_t *a, transform_t *tA,
    }
    else if (a->type == CT_RECTANGLE && b->type == CT_CIRCLE)
    {
-      f32 expRectHalfWidth = (a->width / 2) + b->width;
-      f32 expRectHalfHeight = (a->height / 2) + b->height;
-      f32 circleDistanceX = abs(tB->pos.x - tA->pos.x);
-      f32 circleDistanceY = abs(tB->pos.y - tA->pos.y);
+      f32 expRectHalfWidth = (f32)(a->width / 2) + b->width;
+      f32 expRectHalfHeight = (f32)(a->height / 2) + b->height;
+      f32 circleDistanceX = (f32)fabs(tB->pos.x - tA->pos.x);
+      f32 circleDistanceY = (f32)fabs(tB->pos.y - tA->pos.y);
       if (circleDistanceX >= expRectHalfWidth ||
           circleDistanceY >= expRectHalfHeight)
       {

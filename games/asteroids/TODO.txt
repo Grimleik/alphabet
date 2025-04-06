@@ -1,0 +1,16 @@
+TODO: 
+   * Full logic:
+      * Collision logic with asteroids and bullets.
+         * Spawn Bullets.
+      * Add score.
+      * Implement steering logic.
+      * Add lives.
+      * Add powerups.
+      * 
+   * Add menu and game over screen.
+   * Draw images, using stb_image.h.
+   * Add sound.
+   * Add particles.
+   * Review Code and coding style.
+      * Need to handle growing of entities and component arrays.
+      * Having a null entity/component means we have to start each loop from 1, a bit unintuitive.
