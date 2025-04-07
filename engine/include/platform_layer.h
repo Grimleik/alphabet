@@ -23,7 +23,7 @@ namespace Platform
 	{
 		bool isRunning;
 		u64 frame;
-		f64 dt;
+		f32 dt;
 		f64 totalTime;
 		PUPTable pups;
 		// NOTE(pf): This is an opaque ptr that the game can bind its memory to.

@@ -19,17 +19,16 @@ enum ENTITY_TYPES
 	ET_BULLET,
 };
 
-typedef struct transform_t transform_t;
 struct transform_t
 {
-	vec2_t pos;
-	vec2_t vel;
-	vec2_t drag;
-	vec2_t dir;
-	// f32 prevX, prevY;
+	vec2f pos;
+	vec2f vel;
+	vec2f drag;
+	vec2f dir;
+	f32 speed;
+	f32 acc;
 };
 
-typedef struct health_t health_t;
 struct health_t
 {
 	i32 health;
@@ -169,7 +168,7 @@ void entity_manager_shutdown(entity_manager_t *em);
 		entity->componentMask |= COMPONENT;                                                                \
 		ca->lookUp[entity->id] = index;                                                                    \
 		TYPE *rh = (TYPE *)ca->components + index;                                                         \
-		*rh = {0};                                                                                   \
+		*rh = {};                                                                                   \
 		return (TYPE *)(ca->components) + index;                                                           \
 	}                                                                                                      \
 	void entity_remove_##TYPE(entity_manager_t *em, entity_t *entity)                                      \

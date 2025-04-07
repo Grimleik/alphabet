@@ -46,6 +46,13 @@ void Renderer::PushCmd_Line(const CmdLine &&line)
 	cmd.line = std::move(line);
 }
 
+void Renderer::PushCmd_Text(const CmdText &&text)
+{
+	Renderer::Command &cmd = PushCommand();
+	cmd.type = CMDType::TEXT;
+	cmd.text = std::move(text);
+}
+
 void Renderer::Flip()
 {
 	backend->ProcessCommands(commandQueue);

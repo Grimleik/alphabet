@@ -36,10 +36,15 @@ public:
 
 	void *Partition(size_t szInBytes, bool zeroInit = true, size_t alignment = 1);
 
-	template <typename T>
-	T *Partition(bool zeroInit = true, size_t alignment = 1)
+	template <typename T, typename... Args>
+	T *Partition(Args &&...args)
 	{
-		return new (Partition(sizeof(T), zeroInit, alignment)) T();
+		void *result = Partition(sizeof(T));
+		if (!result)
+		{
+			return nullptr;
+		}
+		return new (result) T(std::forward<Args>(args)...);
 	}
 
 	template <typename T, typename... Args>

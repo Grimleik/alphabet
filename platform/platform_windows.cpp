@@ -151,12 +151,9 @@ int Platform::Create()
 	InitializeWindows(winState);
 	Renderer::Settings &rendSettings = Renderer::Instance->settings;
 	HDC hdc = GetDC(winState.hwnd);
-	HDC hdcMem = CreateCompatibleDC(hdc);
-	HBITMAP hbmMem = CreateCompatibleBitmap(hdc, rendSettings.width, rendSettings.height);
-	HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, hbmMem);
 
-	RenderSoftwareImpl *swBackend = MemoryManager::Instance->Partition<RenderSoftwareImpl>();
-	swBackend->Init(&winState.hwnd);
+	RenderSoftwareImpl *swBackend = MemoryManager::Instance->Partition<RenderSoftwareImpl>(winState.hwnd, hdc);
+	swBackend->Init();
 	Renderer::Instance->AddBackend(swBackend->GetType(), swBackend);
 	Renderer::Instance->SwapBackend(Renderer::BACKEND::Software);
 	// Renderer::Instance->settings.vSync = true;
@@ -194,7 +191,7 @@ int Platform::Create()
 		Renderer::Instance->Flip();
 		QueryPerformanceCounter(&end);
 		double elapsedTime = static_cast<double>(end.QuadPart - start.QuadPart) / freq.QuadPart;
-		platState.dt = elapsedTime;
+		platState.dt = (f32)elapsedTime;
 		start = end;
 
 		AGE_LOG(LOG_LEVEL::DEBUG, "FrameTime is: {} and FPS: {}", platState.dt, 1.0 / platState.dt);
@@ -204,9 +201,6 @@ int Platform::Create()
 
 	Renderer::Instance->Shutdown();
 
-	SelectObject(hdcMem, hbmOld);
-	DeleteObject(hbmMem);
-	DeleteDC(hdcMem);
 	ReleaseDC(winState.hwnd, hdc);
 	DestroyWindow(winState.hwnd);
 	return 0;

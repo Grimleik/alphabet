@@ -5,36 +5,118 @@
    ========================================================================*/
 #define CU_MATH_H
 
-typedef struct vec2_t vec2_t;
-struct vec2_t 
+#define SQUARE(x) ((x) * (x))
+
+template <typename T>
+struct vec2
 {
-    f32 x, y;    
+	T x, y;
+
+	vec2() : x(0), y(0) {}
+	vec2(T x, T y) : x(x), y(y) {}
+
+	T length2() const
+	{
+		return x * x + y * y;
+	}
+
+	T length() const
+	{
+		return static_cast<T>(sqrt(x * x + y * y));
+	}
+
+	vec2 normalize() const
+	{
+		T len = length();
+		return {x / len, y / len};
+	}
+
+	vec2 operator*(T scalar) const
+	{
+		return {x * scalar, y * scalar};
+	}
+
+	vec2 operator+(const vec2 &other) const
+	{
+		return {x + other.x, y + other.y};
+	}
 };
 
-static inline f32 vec2_length2(vec2_t v)
+template <typename T>
+struct vec3
 {
-    return v.x * v.x + v.y * v.y;
-}
+	T x, y, z;
 
-static inline f32 vec2_length(vec2_t v)
-{
-    return (f32)sqrt(v.x * v.x + v.y * v.y);
-}
+	vec3() : x(0), y(0), z(0) {}
+	vec3(T x, T y, T z) : x(x), y(y), z(z) {}
 
-static inline vec2_t vec2_normalize(vec2_t v)
-{
-    f32 length = (f32) sqrt(v.x * v.x + v.y * v.y);
-    return {v.x / length, v.y / length};
-}
+	T length2() const
+	{
+		return x * x + y * y + z * z;
+	}
 
-static inline vec2_t vec2_mul_s(vec2_t v, f32 s)
-{
-    return {v.x * s, v.y * s};
-}
+	T length() const
+	{
+		return static_cast<T>(sqrt(x * x + y * y + z * z));
+	}
 
-static inline vec2_t vec2_add_v(vec2_t a, vec2_t b)
+	vec3 normalize() const
+	{
+		T len = length();
+		return {x / len, y / len, z / len};
+	}
+
+	vec3 operator*(T scalar) const
+	{
+		return {x * scalar, y * scalar, z * scalar};
+	}
+
+	vec3 operator+(const vec3 &other) const
+	{
+		return {x + other.x, y + other.y, z + other.z};
+	}
+};
+
+template <typename T>
+struct vec4
 {
-    return {a.x + b.x, a.y + b.y};
-}
+	T x, y, z, w;
+
+	vec4() : x(0), y(0), z(0), w(0) {}
+	vec4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {}
+
+	T length2() const
+	{
+		return x * x + y * y + z * z + w * w;
+	}
+
+	T length() const
+	{
+		return static_cast<T>(sqrt(x * x + y * y + z * z + w * w));
+	}
+
+	vec4 normalize() const
+	{
+		T len = length();
+		return {x / len, y / len, z / len, w / len};
+	}
+
+	vec4 operator*(T scalar) const
+	{
+		return {x * scalar, y * scalar, z * scalar, w * scalar};
+	}
+
+	vec4 operator+(const vec4 &other) const
+	{
+		return {x + other.x, y + other.y, z + other.z, w + other.w};
+	}
+};
+
+typedef vec2<f32> vec2f;
+typedef vec2<i32> vec2i;
+typedef vec3<f32> vec3f;
+typedef vec3<i32> vec3i;
+typedef vec4<f32> vec4f;
+typedef vec4<i32> vec4i;
 
 #endif

@@ -15,11 +15,13 @@
 // TODO: Data driven instead of hardcoded.
 #define PLAYER_WIDTH 40
 #define PLAYER_HEIGHT 40
+#define PLAYER_SPEED 10
 #define ASTEROID_WIDTH 10
 #define ASTEROID_HEIGHT 10
+#define ASTEROID_SPEED 20
 #define BULLET_WIDTH 5
 #define BULLET_HEIGHT 5
-#define BULLET_SPEED 10
+#define BULLET_SPEED 30
 
 #define COLOR_WHITE 0xFFFFFFFF
 #define COLOR_BLACK 0x00000000
@@ -56,6 +58,10 @@ void spawn_player(AsteroidState *gameState, i32 x, i32 y)
 	transform_t *transform = entity_add_transform_t(&gameState->entityManager, gameState->player);
 	transform->pos = {(f32)x, (f32)y};
 	transform->dir = {0, 0};
+	transform->drag = {0, 0};
+	transform->vel = {0, 0};
+	transform->acc = 0.0f;
+	transform->speed = PLAYER_SPEED;
 	collision_t *col = entity_add_collision_t(&gameState->entityManager, gameState->player);
 	col->type = CT_RECTANGLE;
 	col->width = PLAYER_WIDTH;
@@ -75,7 +81,10 @@ void spawn_asteroid(AsteroidState *gameState)
 	transform_t *transform = entity_add_transform_t(&gameState->entityManager, asteroid);
 	transform->pos = {(f32)(rand() % 800), (f32)(rand() % 600)};
 	transform->dir = {(f32)(rand() % 5), (f32)(rand() % 5)};
-	transform->vel = transform->dir;
+	transform->vel = transform->dir * ASTEROID_SPEED;
+	transform->acc = 0.0f;
+	transform->drag = {0.0f, 0.0f};
+	transform->speed = ASTEROID_SPEED;
 	collision_t *col = entity_add_collision_t(&gameState->entityManager, asteroid);
 	col->type = CT_RECTANGLE;
 	col->width = ASTEROID_WIDTH;
@@ -95,7 +104,9 @@ void spawn_bullet(AsteroidState *gameState)
 	transform_t *playerTransform = entity_get_transform_t(&gameState->entityManager, gameState->player);
 	transform->pos = {playerTransform->pos.x, playerTransform->pos.y};
 	transform->dir = {playerTransform->dir.x, playerTransform->dir.y};
-	transform->vel = vec2_mul_s(transform->dir, BULLET_SPEED);
+	transform->vel = transform->dir * BULLET_SPEED;
+	transform->acc = 0.0f;
+	transform->drag = {0.0f, 0.0f};
 	collision_t *col = entity_add_collision_t(&gameState->entityManager, bullet);
 	col->type = CT_RECTANGLE;
 	col->mask = CM_ASTEROID;
@@ -122,18 +133,6 @@ static void entity_modify_health(AsteroidState *gameState, entity_t *entity, hea
 		}
 	}
 }
-
-// void game_update(PlatState *state)
-// {
-// }
-
-// void game_shutdown(PlatState *state)
-// {
-// 	game_state_shutdown(get_game_state(state));
-// 	free(state->input);
-// 	free(state->render->pixels);
-// 	free(state->render);
-// }
 
 extern "C"
 {
@@ -180,7 +179,9 @@ extern "C"
 		// LOGIC:
 		// PLAYER:
 		entity_t *player = gameState->player;
-		vec2_t player_movement = {0, 0};
+		transform_t *playerTransform = entity_get_transform_t(&gameState->entityManager, player);
+		playerTransform->acc = 0.0f;
+		vec2f player_movement = {0, 0};
 		if (Input::Instance->IsKeyHeld(Input::KEYS::W))
 		{
 			player_movement.y += 1;
@@ -198,15 +199,14 @@ extern "C"
 			player_movement.x += 1;
 		}
 
-		transform_t *playerTransform = entity_get_transform_t(&gameState->entityManager, player);
-
-		if (vec2_length2(player_movement) > 0)
+		playerTransform->acc = 0.0f;
+		if (player_movement.length2() > 0)
 		{
-			player_movement = vec2_normalize(player_movement);
-			// TODO(pf): Implement correct steering logic.
+			player_movement = player_movement.normalize();
+			playerTransform->acc = 1.0f;
 			playerTransform->dir = player_movement;
 		}
-		playerTransform->dir = vec2_mul_s(player_movement, 500);
+		playerTransform->dir = player_movement;
 
 		// ASTEROIDS:
 		if (gameState->asteroidCount < ASTEROID_COUNT)
@@ -264,33 +264,34 @@ extern "C"
 			default:
 				break;
 			}
-
-			vec2_t& vel = transform->vel;
-			vel = vec2_add_v(vel, vec2_mul_s(transform->dir, (f32)plat->dt));
-			vel.x *= 1.0f - transform->drag.x;
-			vel.y *= 1.0f - transform->drag.y;
-			transform->pos = vec2_add_v(transform->pos, transform->vel);
-			vec2_t *pos = &transform->pos;
+			f32 &dt = plat->dt;
+			f32 &acc = transform->acc;
+			vec2f &vel = transform->vel;
+			vec2f &dir = transform->dir;
+			vec2f &pos = transform->pos;
+			vel = vel + (dir * acc * transform->speed * dt);
+			transform->pos = transform->pos + transform->vel * dt;
+			vel.x *= 1.0f - (transform->drag.x * dt);
+			vel.y *= 1.0f - (transform->drag.y * dt);
 
 			const Renderer::Settings &settings = Renderer::Instance->settings;
-			if (pos->x > settings.width)
+			if (pos.x > settings.width)
 			{
-				pos->x -= settings.width;
+				pos.x -= settings.width;
+			}
+			if (pos.x < 0)
+			{
+				pos.x += settings.width;
 			}
 
-			if (pos->x < 0)
+			if (pos.y > settings.height)
 			{
-				pos->x += settings.width;
+				pos.y -= settings.height;
 			}
 
-			if (pos->y > settings.height)
+			if (pos.y < 0)
 			{
-				pos->y -= settings.height;
-			}
-
-			if (pos->y < 0)
-			{
-				pos->y += settings.height;
+				pos.y += settings.height;
 			}
 
 			// NOTE: Render AFTER positional updates.
@@ -397,6 +398,12 @@ extern "C"
 		}
 
 		// !SIMULATION
+
+		Renderer::Instance->PushCmd_Text({.x = 10,
+										  .y = 10,
+										  .text = "Hello World",
+										  .len = 11,
+										  .c = COLOR_WHITE});
 	}
 
 	void AGE_GameShutdown(Platform::State *plat)

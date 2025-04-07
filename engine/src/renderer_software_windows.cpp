@@ -13,9 +13,11 @@
 
 // #include <mutex>
 
-void RenderSoftwareImpl::Init(HWND *hwnd_)
+RenderSoftwareImpl::RenderSoftwareImpl(const HWND &hwnd_, const HDC &hdc_) : hwnd(hwnd_), hdc(hdc_)
 {
-	hwnd = hwnd_;
+}
+void RenderSoftwareImpl::Init()
+{
 	Renderer::Settings &settings = Renderer::Instance->settings;
 	backBuffer.width = settings.width;
 	backBuffer.height = settings.height;
@@ -52,6 +54,7 @@ void RenderSoftwareImpl::ProcessCommands(const Renderer::CommandQueue &queue)
 
 void RenderSoftwareImpl::Shutdown()
 {
+	ReleaseDC(hwnd, hdc);
 }
 
 Renderer::BACKEND RenderSoftwareImpl::GetType()
@@ -144,6 +147,14 @@ void RenderSoftwareImpl::ProcessCommandsInternal(const Renderer::CommandQueue &q
 		}
 		break;
 
+		case Renderer::CMDType::TEXT:
+		{
+			const Renderer::CmdText &text = dc->text;
+			TextOutA(hdc, text.x, text.y, text.text, text.len);
+			// TODO: Actually render the text into OUR buffer.
+		}
+		break;
+
 		default:
 		{
 			AGE_LOG(LOG_LEVEL::DEBUG, "Trying to render an unsupported drawing command {}.",
@@ -156,12 +167,15 @@ void RenderSoftwareImpl::ProcessCommandsInternal(const Renderer::CommandQueue &q
 
 void RenderSoftwareImpl::Flip()
 {
-	HDC hdc = GetDC(*hwnd);
-	StretchDIBits(hdc,
-				  0, 0, backBuffer.width, backBuffer.height,
-				  0, 0, backBuffer.width, backBuffer.height,
-				  backBuffer.pixels,
-				  &bitmapInfo,
-				  DIB_RGB_COLORS,
-				  SRCCOPY);
+	int result = StretchDIBits(hdc,
+							   0, 0, backBuffer.width, backBuffer.height,
+							   0, 0, backBuffer.width, backBuffer.height,
+							   backBuffer.pixels,
+							   &bitmapInfo,
+							   DIB_RGB_COLORS,
+							   SRCCOPY);
+	if (result == GDI_ERROR)
+	{
+		AGE_LOG(LOG_LEVEL::ERR, "GDI error: {}.", GetLastError());
+	}
 }

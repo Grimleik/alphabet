@@ -15,8 +15,8 @@ constexpr size_t REQUIRED_MEMORY = LARGEST_HEIGHT * LARGEST_WIDTH * BYTES_PER_PI
 class RenderSoftwareImpl : public Renderer::IBackend
 {
 public:
-
-	void Init(HWND *hwnd);
+	RenderSoftwareImpl(const HWND &hwnd_, const HDC& hdc_);
+	void Init();
 	void Start();
 	void ProcessCommands(const Renderer::CommandQueue &queue) override;
 	void Shutdown() override;
@@ -37,6 +37,7 @@ private:
 
 	// void *memory;
 	BITMAPINFO bitmapInfo;
-	HWND *hwnd;
+	const HWND &hwnd;
+	const HDC &hdc;
 };
 #endif

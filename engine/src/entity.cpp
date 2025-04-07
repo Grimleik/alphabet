@@ -21,8 +21,8 @@ bool check_collision(collision_t *a, transform_t *tA,
    }
    else if (a->type == CT_CIRCLE && b->type == CT_CIRCLE)
    {
-      vec2_t diff = {tA->pos.x - tB->pos.x, tA->pos.y - tB->pos.y};
-      return vec2_length(diff) < (a->width + b->width);
+      vec2f diff = {tA->pos.x - tB->pos.x, tA->pos.y - tB->pos.y};
+      return diff.length2() < SQUARE((a->width + b->width));
    }
    else if (a->type == CT_RECTANGLE && b->type == CT_CIRCLE)
    {

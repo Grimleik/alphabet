@@ -16,6 +16,7 @@ public:
 		RECTANGLE,
 		CIRCLE,
 		LINE,
+		TEXT,
 		// BMP,
 		// Mesh ?
 		// Texture ?
@@ -26,6 +27,7 @@ public:
 		"RECTANGLE",
 		"CIRCLE",
 		"LINE",
+		"TEXT",
 		// "DCT_BMP",
 		// "DCT_Mesh",
 		// "DCT_Texture"
@@ -51,6 +53,14 @@ public:
 		u32 c;
 	};
 
+	struct CmdText
+	{
+		i32 x, y;
+		const char *text;
+		u32 len;
+		u32 c;
+	};
+
 	struct CmdBatch
 	{
 		CMDType type;
@@ -68,6 +78,7 @@ public:
 			CmdClearScreen csc;
 			CmdRectangle rectangle;
 			CmdLine line;
+			CmdText text;
 			CmdBatch batch;
 		};
 	};
@@ -118,6 +129,7 @@ public:
 	void PushCmd_ClearScreen(const CmdClearScreen &&csc);
 	void PushCmd_Rectangle(const CmdRectangle &&rect);
 	void PushCmd_Line(const CmdLine &&line);
+	void PushCmd_Text(const CmdText &&text);
 
 	void Flip();
 	void Shutdown();
