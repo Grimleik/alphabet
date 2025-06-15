@@ -84,6 +84,12 @@ Renderer::BACKEND RenderSoftwareImpl::GetType()
 	return Renderer::BACKEND::Software;
 }
 
+void RenderSoftwareImpl::Resize()
+{
+	backBuffer.width = Renderer::Instance->settings.width;
+	backBuffer.height = Renderer::Instance->settings.height;
+}
+
 void RenderSoftwareImpl::Blend(u32 *dest, u32 *src, u32 alpha)
 {
 	// Simple alpha blending

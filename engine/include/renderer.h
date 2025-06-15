@@ -116,15 +116,18 @@ public:
 	{
 		i16 width, height;
 		bool vSync;
+		bool fullscreen;
 	};
 
 	class IBackend
 	{
 	public:
+		virtual ~IBackend() = default;
 		virtual void Start() = 0;
 		virtual void ProcessCommands(const CommandQueue &queue) = 0;
 		virtual void Shutdown() = 0;
 		virtual BACKEND GetType() = 0;
+		virtual void Resize() = 0;
 	};
 
 	static void Create();
