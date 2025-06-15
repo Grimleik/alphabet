@@ -11,7 +11,8 @@ Renderer *Renderer::Instance = nullptr;
 
 void Renderer::Create()
 {
-	Instance = MemoryManager::Instance->Partition<Renderer>();
+	Instance = MemoryManager::Instance->PartitionSystem<Renderer>();
+	Instance->backends.LazyInit((int)BACKEND::MAX);
 }
 
 Renderer::Command &Renderer::PushCommand()
@@ -22,7 +23,7 @@ Renderer::Command &Renderer::PushCommand()
 
 void Renderer::AddBackend(BACKEND bt, IBackend *bk)
 {
-	backends.emplace(bt, bk);
+	backends[bt] = bk;
 }
 
 void Renderer::PushCmd_ClearScreen(const CmdClearScreen &&csc)
@@ -51,6 +52,21 @@ void Renderer::PushCmd_Text(const CmdText &&text)
 	Renderer::Command &cmd = PushCommand();
 	cmd.type = CMDType::TEXT;
 	cmd.text = std::move(text);
+	cmd.text.scale = text.scale; // Default scale, can be changed later
+}
+
+void Renderer::PushCmd_Batch(const CmdBatch &batch)
+{
+	Renderer::Command &cmd = PushCommand();
+	cmd.type = CMDType::BATCH;
+	cmd.batch = batch;
+}
+
+void Renderer::PushCmd_Batch(const CmdBatch &&batch)
+{
+	Renderer::Command &cmd = PushCommand();
+	cmd.type = CMDType::BATCH;
+	cmd.batch = std::move(batch);
 }
 
 void Renderer::Flip()
@@ -78,7 +94,7 @@ void Renderer::SwapBackend(BACKEND backendType)
 	if (activeBackend != backendType)
 	{
 		activeBackend = backendType;
-		if (backends.find(backendType) != backends.end())
+		if (backends.Contains(backendType))
 		{
 			backend = backends[backendType];
 			backend->Start();

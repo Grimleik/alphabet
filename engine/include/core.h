@@ -51,8 +51,4 @@ inline int wrap(int value, int max)
 	return (value + max) % max;
 }
 
-inline size_t Align(size_t szInBytes, size_t alignment)
-{
-	return (alignment - (szInBytes % alignment)) % alignment;
-}
 #endif

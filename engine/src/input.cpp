@@ -10,7 +10,7 @@ Input *Input::Instance = nullptr;
 void Input::Create()
 {
 	AGE_AssertCheck(Instance == nullptr, "Trying to recreate a singleton instance. Not allowed.");
-	Instance = MemoryManager::Instance->Partition<Input>();
+	Instance = MemoryManager::Instance->PartitionSystem<Input>();
 }
 
 void Input::SwapInputBuffer()

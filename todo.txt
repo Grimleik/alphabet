@@ -1,9 +1,13 @@
 [X] Make it compile and run on Windows. [X]
 	[~] .. and again on Linux :D
-[~] Start porting over from C to C++. 
+[~] Start porting over from C to C++.
+	[ ] Un-templatize pool allocator, make the element size part of the construction.
+		This kinda make sense. We allocate a FIXED AMOUNT of memory to components.
+		But the components block can vary to optimize for the cache ?
+			Maybe this trade off is not good tho ?
 
 [ ] Create a threading library that I can entertain the idea of starting, stopping
-and shutting down without having running threads active. 
+and shutting down without having running threads active.
 
 [ ] System ideas:
 	[ ] Memory adapation system:
@@ -16,4 +20,9 @@ to test some functionality.
 [ ] Start writing GemTD.
 [ ] Additions to Asteroids,
 	- We should define deadlines for projects!
-[ ] 
+[ ]
+
+[ ] Utilize custom memory allocation scheme through the STL containers.
+
+[ ] Find a better way to find files than:
+	../../../top/of/root/here/say/what ??

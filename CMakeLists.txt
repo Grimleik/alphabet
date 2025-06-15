@@ -18,21 +18,22 @@ endif()
 set(ENGINE_NAME age)
 set(PROFILE_BUILD OFF)
 set(CMAKE_BUILD_PARALLEL_LEVEL 8)
+set(ENABLE_TESTING OFF)
 # set(CMAKE_UNITY_BUILD ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-#Enable testing
-# option(ENABLE_TESTING "Enable testing" OFF)
-
-# if(ENABLE_TESTING)
-# 	enable_testing()
-# 	add_subdirectory(external/googletest)
-# 	add_subdirectory(tests)
-# endif()
+if(ENABLE_TESTING)
+	enable_testing()
+	add_subdirectory(external/googletest)
+	add_subdirectory(tests)
+endif()
 
 add_subdirectory(platform)
 add_subdirectory(engine)
-add_subdirectory(games/asteroids)
+# Only add the game you want to build here:
+# add_subdirectory(games/asteroids)
+# add_subdirectory(games/breakout)
+add_subdirectory(games/gemtd)
 

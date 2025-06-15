@@ -6,6 +6,8 @@
 
 #include "renderer.h"
 #include <windows.h>
+#include <vector>
+#include <../external/stb_truetype.h>
 
 constexpr u16 LARGEST_WIDTH = 1920;
 constexpr u16 LARGEST_HEIGHT = 1080;
@@ -25,13 +27,15 @@ public:
 private:
 	void SetPixel(int x, int y, int color);
 	void ProcessCommandsInternal(const Renderer::CommandQueue &queue);
+	void ExecuteCommand(const Renderer::Command *dc);
 	void Flip();
+	void Blend(u32 *dest, u32 *src, u32 alpha);
 	// TODO(pf): Experiement with declaration and instantiation on the same line
 	struct BackBuffer
 	{
 		void *pixels;
-		int width;
-		int height;
+		u32 width;
+		u32 height;
 		int pitch;
 	} backBuffer;
 
@@ -39,5 +43,7 @@ private:
 	BITMAPINFO bitmapInfo;
 	const HWND &hwnd;
 	const HDC &hdc;
+	stbtt_fontinfo font;
+	std::vector<unsigned char> fontBuffer;
 };
 #endif

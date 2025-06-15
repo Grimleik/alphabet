@@ -9,7 +9,7 @@
 #include <string_view>
 #include <format>
 
-#define LOG_ENABLED 0
+#define LOG 1
 
 enum class LOG_LEVEL
 {
@@ -20,7 +20,7 @@ enum class LOG_LEVEL
 };
 
 constexpr const char *LOG_LEVEL_STR[] = {
-	"ERROR",
+	"ERR",
 	"WARN",
 	"INFO",
 	"DEBUG",

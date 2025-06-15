@@ -13,11 +13,12 @@ namespace Platform
 	// and we are allowing ourselevs to do so dynamically, we have to patch up
 	// the pointer that we allocated before loading the dll to point to the same
 	// singleton instance as the exec in the dll. PUP = PatchUpPointer.
-	struct PUPTable 
+	struct PUPTable
 	{
 		ISingleton *memoryManager;
 		ISingleton *input;
 		ISingleton *renderer;
+		ISingleton *ecs;
 	};
 	struct State
 	{
@@ -43,4 +44,5 @@ extern "C"
 	void GAME_API AGE_GameUpdate(Platform::State *plat);
 	void GAME_API AGE_GameShutdown(Platform::State *plat);
 }
+
 #endif

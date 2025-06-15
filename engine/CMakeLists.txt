@@ -38,6 +38,7 @@ target_precompile_headers(${ENGINE_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/global_pch.
 target_include_directories(${ENGINE_NAME} PRIVATE
     ${PLAT_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/external
 )
 
 # NOTE: Platform specific atm.

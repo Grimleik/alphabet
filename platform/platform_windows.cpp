@@ -13,6 +13,42 @@
 #include "renderer_software_windows.h"
 #include "input.h"
 #include "logger.h"
+#include "entity.h"
+
+#if __cplusplus >= 201703L
+#include <new>
+#endif
+
+#if defined(_WIN32)
+#include <windows.h>
+#include <intrin.h>
+#else
+#include <unistd.h>
+#endif
+
+int get_cache_line_size()
+{
+	// 1. C++17 standard interference size
+#if __cplusplus >= 201703L
+	size_t interference_size = std::hardware_destructive_interference_size;
+	if (interference_size >= 16 && interference_size <= 256)
+	{
+		return static_cast<int>(interference_size);
+	}
+#endif
+#if defined(_WIN32) && (defined(_M_X64) || defined(_M_IX86))
+	int cpuInfo[4] = {-1};
+	__cpuid(cpuInfo, 1);
+	int cache_line_size = ((cpuInfo[1] >> 8) & 0xFF) * 8; // EBX[15:8] * 8
+	if (cache_line_size >= 16 && cache_line_size <= 256)
+	{
+		return cache_line_size;
+	}
+#endif
+	AGE_LOG(LOG_LEVEL::WARN, "Failed to get cache line size. Using default value.");
+	// 4. Fallback default
+	return 64;
+}
 
 #define ErrorBox(msg) \
 	MessageBoxA(nullptr, msg, "Error", MB_OK | MB_ICONERROR);
@@ -20,22 +56,26 @@
 enum class Games
 {
 	Asteroids,
+	Breakout,
 	GemTD
 };
 
 // TODO: Concat ?
 constexpr const char *AVAILABLE_DLLs[] = {
 	"asteroids.dll",
+	"breakout.dll",
 	"gemtd.dll",
 };
 
 constexpr const char *AVAILABLEDLL_TMPs[] = {
 	"asteroids_temp.dll",
+	"breakout_temp.dll",
 	"gemtd_temp.dll",
 };
 
 constexpr const char *AVAILABLE_PDBs[] = {
 	"asteroids.pdb",
+	"breakout.pdb",
 	"gemtd.pdb",
 };
 
@@ -75,7 +115,6 @@ std::string FindLatestPDB()
 	std::string result;
 	do
 	{
-
 		if (!(findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
 		{
 			if (CompareFileTime(&findData.ftLastWriteTime, &latest) > 0)
@@ -123,7 +162,7 @@ bool IsHotReloading()
 int Platform::Create()
 {
 	WindowsState winState;
-	winState.activeGame = Games::Asteroids;
+	winState.activeGame = Games::GemTD;
 
 	if (!SymInitialize(GetCurrentProcess(), NULL, FALSE))
 	{
@@ -142,9 +181,10 @@ int Platform::Create()
 
 	size_t appMemSz = GB(1);
 	void *appMem = malloc(appMemSz);
-	MemoryManager::Create(appMem, appMemSz);
+	MemoryManager::Create(appMem, appMemSz, get_cache_line_size());
 	Input::Create();
 	Renderer::Create();
+	ECS::Create();
 	Renderer::Instance->settings.width = 800;
 	Renderer::Instance->settings.height = 600;
 
@@ -152,7 +192,7 @@ int Platform::Create()
 	Renderer::Settings &rendSettings = Renderer::Instance->settings;
 	HDC hdc = GetDC(winState.hwnd);
 
-	RenderSoftwareImpl *swBackend = MemoryManager::Instance->Partition<RenderSoftwareImpl>(winState.hwnd, hdc);
+	RenderSoftwareImpl *swBackend = MemoryManager::Instance->PartitionWithArgs<RenderSoftwareImpl>(winState.hwnd, hdc);
 	swBackend->Init();
 	Renderer::Instance->AddBackend(swBackend->GetType(), swBackend);
 	Renderer::Instance->SwapBackend(Renderer::BACKEND::Software);
@@ -161,6 +201,7 @@ int Platform::Create()
 		.memoryManager = MemoryManager::Instance,
 		.input = Input::Instance,
 		.renderer = Renderer::Instance,
+		.ecs = ECS::Instance,
 	};
 
 	AGE_GameInitBinding(&platState, false);
@@ -194,7 +235,7 @@ int Platform::Create()
 		platState.dt = (f32)elapsedTime;
 		start = end;
 
-		AGE_LOG(LOG_LEVEL::DEBUG, "FrameTime is: {} and FPS: {}", platState.dt, 1.0 / platState.dt);
+		// MemoryManager::Instance->Report();
 	}
 
 	AGE_GameShutdownBinding(&platState);
@@ -277,21 +318,21 @@ void UnloadGameDLL(WindowsState &state)
 bool InitializeWindows(WindowsState &state)
 {
 	// Create Window:
-	const wchar_t CLASS_NAME[] = L"AGEx64";
+	const char CLASS_NAME[] = "AGEx64";
 	HINSTANCE hInstance = GetModuleHandle(NULL);
-	WNDCLASSW wc = {};
+	WNDCLASS wc = {};
 	wc.lpfnWndProc = WindowProc;
 	wc.hInstance = hInstance;
 	wc.lpszClassName = CLASS_NAME;
 
-	if (!RegisterClassW(&wc))
+	if (!RegisterClass(&wc))
 	{
 		ErrorBox("Failed to register Window.");
 		return false;
 	}
 
 	Renderer::Settings &settings = Renderer::Instance->settings;
-	HWND hwnd = CreateWindowExW(0, CLASS_NAME, L"AGEx64", WS_OVERLAPPEDWINDOW,
+	HWND hwnd = CreateWindowEx(0, CLASS_NAME, "AGEx64", WS_OVERLAPPEDWINDOW,
 								CW_USEDEFAULT, CW_USEDEFAULT, settings.width,
 								settings.height, NULL, NULL, hInstance, NULL);
 

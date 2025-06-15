@@ -6,6 +6,7 @@
 
 #include "core.h"
 #include "singleton.h"
+#include "containers.h"
 
 class Renderer : public ISingleton
 {
@@ -17,6 +18,7 @@ public:
 		CIRCLE,
 		LINE,
 		TEXT,
+		BATCH,
 		// BMP,
 		// Mesh ?
 		// Texture ?
@@ -28,6 +30,7 @@ public:
 		"CIRCLE",
 		"LINE",
 		"TEXT",
+		"BATCH",
 		// "DCT_BMP",
 		// "DCT_Mesh",
 		// "DCT_Texture"
@@ -59,6 +62,7 @@ public:
 		const char *text;
 		u32 len;
 		u32 c;
+		f32 scale;
 	};
 
 	struct CmdBatch
@@ -89,6 +93,7 @@ public:
 		Software,
 		OpenGL,
 		// DirectX,
+		MAX,
 	};
 
 	constexpr static const char *BACKEND_NAMES[] = {
@@ -96,6 +101,7 @@ public:
 		"Software",
 		"OpenGL",
 		// DirectX,
+		"MAX",
 	};
 
 	constexpr static u16 MAX_DRAW_COMMANDS = 4096;
@@ -130,6 +136,8 @@ public:
 	void PushCmd_Rectangle(const CmdRectangle &&rect);
 	void PushCmd_Line(const CmdLine &&line);
 	void PushCmd_Text(const CmdText &&text);
+	void PushCmd_Batch(const CmdBatch &batch);
+	void PushCmd_Batch(const CmdBatch &&batch);
 
 	void Flip();
 	void Shutdown();
@@ -143,7 +151,8 @@ private:
 	Command &PushCommand();
 	CommandQueue commandQueue;
 	IBackend *backend;
-	std::map<BACKEND, IBackend *> backends;
+	HashMap<BACKEND, IBackend *> backends;
+	// std::map<BACKEND, IBackend *> backends;
 };
 
 #endif
