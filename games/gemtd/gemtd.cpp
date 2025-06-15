@@ -34,28 +34,6 @@ extern "C"
 			gameState = (GameState *)plat->gameState;
 			plat->isRunning = true;
 			plat->dt = 0.0f;
-
-			int tileSize = 20;												 // Size of each tile
-			int gridWidth = Renderer::Instance->settings.width / tileSize;	 // Number of tiles in width
-			int gridHeight = Renderer::Instance->settings.height / tileSize; // Number of tiles in height
-			Renderer::CmdBatch &batchCmd = gameState->batch;
-			batchCmd.count = gridWidth * gridHeight;
-			batchCmd.cmds = MemoryManager::Instance->PartitionBlock(batchCmd.count * sizeof(Renderer::Command));
-			for (int y = 0; y < gridHeight; ++y)
-			{
-				for (int x = 0; x < gridWidth; ++x)
-				{
-					Renderer::Command *cmd = &((Renderer::Command *)batchCmd.cmds)[y * gridWidth + x];
-					*cmd = Renderer::Command();
-					cmd->type = Renderer::CMDType::RECTANGLE;
-					cmd->rectangle.x = x * tileSize;
-					cmd->rectangle.y = y * tileSize;
-					cmd->rectangle.w = tileSize - 1;
-					cmd->rectangle.h = tileSize - 1;
-					cmd->rectangle.c = (u32)(0xFF000000 | (x * 10) | (y * 20)); // Color based on position
-					cmd->rectangle.filled = true;
-				}
-			}
 		}
 	}
 
@@ -65,8 +43,28 @@ extern "C"
 		{
 			plat->isRunning = false;
 		}
-		Renderer::Instance->PushCmd_ClearScreen({0x00000000});								// Clear screen with black color
-		Renderer::Instance->PushCmd_Batch(gameState->batch);								// Draw the grid of rectangles
+		Renderer::Instance->PushCmd_ClearScreen({0x00000000});			 // Clear screen with black color
+		int tileSize = 20;												 // Size of each tile
+		int gridWidth = Renderer::Instance->settings.width / tileSize;	 // Number of tiles in width
+		int gridHeight = Renderer::Instance->settings.height / tileSize; // Number of tiles in height
+		Renderer::CmdBatch &batchCmd = gameState->batch;
+		batchCmd.count = gridWidth * gridHeight;
+		batchCmd.cmds = MemoryManager::Instance->PartitionBlock(batchCmd.count * sizeof(Renderer::Command));
+		for (int y = 0; y < gridHeight; ++y)
+		{
+			for (int x = 0; x < gridWidth; ++x)
+			{
+				Renderer::Command *cmd = &((Renderer::Command *)batchCmd.cmds)[y * gridWidth + x];
+				*cmd = Renderer::Command();
+				cmd->type = Renderer::CMDType::RECTANGLE;
+				cmd->rectangle.x = x * tileSize;
+				cmd->rectangle.y = y * tileSize;
+				cmd->rectangle.w = tileSize - 1;
+				cmd->rectangle.h = tileSize - 1;
+				cmd->rectangle.c = (u32)(0xFF000000 | (x * 10) | (y * 20)); // Color based on position
+				cmd->rectangle.filled = true;
+			}
+		}
 		Renderer::Instance->PushCmd_Text({300, 50, "MINESWEEPER!", 14, 0xFF00FFFF, 32.0f}); // Draw text
 	}
 

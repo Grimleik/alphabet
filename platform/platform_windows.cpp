@@ -304,7 +304,7 @@ void UnloadGameDLL(WindowsState &state)
 	FreeLibrary(state.gameDLL);
 	state.gameDLL = NULL;
 
-	std::string pdb = AVAILABLE_PDBs[(int)state.activeGame];
+	// std::string pdb = AVAILABLE_PDBs[(int)state.activeGame];
 	// std::string pdb = FindLatestPDB();
 	// while (IsFileLocked(pdb.c_str()))
 	// {
@@ -332,9 +332,9 @@ bool InitializeWindows(WindowsState &state)
 	}
 
 	Renderer::Settings &settings = Renderer::Instance->settings;
-	HWND hwnd = CreateWindowEx(0, CLASS_NAME, "AGEx64", WS_OVERLAPPEDWINDOW,
-								CW_USEDEFAULT, CW_USEDEFAULT, settings.width,
-								settings.height, NULL, NULL, hInstance, NULL);
+	HWND hwnd = CreateWindowEx(0, CLASS_NAME, "AGEx64", WS_OVERLAPPED| WS_CAPTION | WS_SYSMENU,
+							   CW_USEDEFAULT, CW_USEDEFAULT, settings.width,
+							   settings.height, NULL, NULL, hInstance, NULL);
 
 	if (!hwnd)
 	{
@@ -350,6 +350,7 @@ bool InitializeWindows(WindowsState &state)
 // Window procedure function
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	static bool isResizing = false;
 	bool processKey = false;
 	Input::KEY_STATES keyState;
 	switch (uMsg)
@@ -369,15 +370,35 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		keyState = Input::KEY_STATES::KEY_UP;
 	}
 	break;
-
+	// case WM_SYSKEYDOWN:
+	// {
+	// 	// NOTE(pf): Fullscreen toggle with Alt+Enter. Maybe move this in the future.
+	// 	// TODO: Think about this some more..
+	// 	if (wParam == VK_RETURN && (GetKeyState(VK_MENU) & 0x8000))
+	// 	{
+	// 		Renderer::Instance->settings.fullscreen = !Renderer::Instance->settings.fullscreen;  // Disable VSync in fullscreen mode.
+	// 		if (Renderer::Instance->settings.fullscreen)
+	// 		{
+	// 			SetWindowLong(hwnd, GWL_STYLE, WS_POPUP | WS_VISIBLE);
+	// 			SetWindowPos(hwnd, HWND_TOP, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), SWP_NOZORDER);
+	// 		}
+	// 		else
+	// 		{
+	// 			SetWindowLong(hwnd, GWL_STYLE, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU);
+	// 			SetWindowPos(hwnd, HWND_NOTOPMOST, 100, 100, Renderer::Instance->settings.width,
+	// 						 Renderer::Instance->settings.height, SWP_NOZORDER);
+	// 		}
+	// 		return 0;
+	// 	}
+	// }break;
 	case WM_KEYDOWN:
 	{
 		processKey = true;
 		keyState = Input::KEY_STATES::KEY_DOWN;
 	}
 	break;
-	}
 
+	}
 	if (processKey)
 	{
 		switch (wParam)

@@ -87,6 +87,15 @@ void Renderer::Resize(u16 nWidth, u16 nHeight)
 		AGE_LOG(LOG_LEVEL::ERR, "Trying to resize renderer to same size, {} and {}. Logic error.", nWidth, nHeight);
 	}
 	settings.width = nWidth;
+	settings.height = nHeight;
+	if (backend)
+	{
+		backend->Resize();
+	}
+	else
+	{
+		AGE_LOG(LOG_LEVEL::ERR, "No backend available to resize.");
+	}
 }
 
 void Renderer::SwapBackend(BACKEND backendType)

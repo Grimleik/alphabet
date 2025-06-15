@@ -9,10 +9,10 @@
 #include <vector>
 #include <../external/stb_truetype.h>
 
-constexpr u16 LARGEST_WIDTH = 1920;
-constexpr u16 LARGEST_HEIGHT = 1080;
+constexpr u16 MAXIMUM_WIDTH = 1920;
+constexpr u16 MAXIMUM_HEIGHT = 1080;
 constexpr u8 BYTES_PER_PIXEL = 4;
-constexpr size_t REQUIRED_MEMORY = LARGEST_HEIGHT * LARGEST_WIDTH * BYTES_PER_PIXEL;
+constexpr size_t REQUIRED_MEMORY = MAXIMUM_HEIGHT * MAXIMUM_WIDTH * BYTES_PER_PIXEL;
 
 class RenderSoftwareImpl : public Renderer::IBackend
 {
@@ -23,6 +23,7 @@ public:
 	void ProcessCommands(const Renderer::CommandQueue &queue) override;
 	void Shutdown() override;
 	Renderer::BACKEND GetType() override;
+	void Resize() override;
 
 private:
 	void SetPixel(int x, int y, int color);
