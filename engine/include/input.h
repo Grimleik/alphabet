@@ -38,7 +38,7 @@ public:
 	struct MouseState
 	{
 		bool lButton;
-		f32 x, y;
+		i32 x, y;
 	};
 
 	struct KeyBuffer
@@ -58,7 +58,7 @@ public:
 	MouseState mouse;
 
 private:
-	constexpr static u16 NR_OF_INPUT_BUFFERS = 3;
+	constexpr static i32 NR_OF_INPUT_BUFFERS = 3;
 	KeyBuffer buffers[NR_OF_INPUT_BUFFERS];
 	i32 activeInputBuffer;
 };

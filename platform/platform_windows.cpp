@@ -227,6 +227,14 @@ int Platform::Create()
 			LoadGameDLL(winState);
 			AGE_GameInitBinding(&platState, true);
 		}
+		// Additional Input updates:
+		POINT pt;
+		GetCursorPos(&pt);
+		ScreenToClient(winState.hwnd, &pt);
+		Input::Instance->mouse.x = clamp((i32)pt.x, 0, Renderer::Instance->settings.width);
+		Input::Instance->mouse.y = clamp((i32)pt.y, 0, Renderer::Instance->settings.height);
+
+
 		AGE_GameUpdateBinding(&platState);
 		Input::Instance->SwapInputBuffer();
 		Renderer::Instance->Flip();
@@ -409,23 +417,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 	break;
 
-	case WM_MOUSEMOVE:
-	{
-		Input::Instance->mouse.x = GET_X_LPARAM(lParam);
-		// TODO:
-		// Input::Instance->mouse.y = Renderer::Instance->settings.height - GET_Y_LPARAM(lParam);
-		// TODO: Fetch windows ClientRect
-		RECT rect;
-		if(!GetClientRect(hwnd, &rect)) {
-			AGE_LOG(LOG_LEVEL::WARN, "Unable to fetch Client rect.");
-			break;
-		}
-		// TODO:
-		int offset = Renderer::Instance->settings.height - (rect.bottom - rect.top);
-		AGE_LOG(LOG_LEVEL::INFO, "Offset {}", offset);
-		Input::Instance->mouse.y = GET_Y_LPARAM(lParam) + offset;
-	}
-	break;
 	}
 	if (processKey)
 	{

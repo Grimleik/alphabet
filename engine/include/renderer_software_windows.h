@@ -46,5 +46,6 @@ private:
 	const HDC &hdc;
 	stbtt_fontinfo font;
 	std::vector<unsigned char> fontBuffer;
+	Renderer::Settings activeSettings;
 };
 #endif

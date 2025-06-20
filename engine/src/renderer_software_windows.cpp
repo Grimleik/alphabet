@@ -19,10 +19,10 @@ RenderSoftwareImpl::RenderSoftwareImpl(const HWND &hwnd_, const HDC &hdc_) : hwn
 
 void RenderSoftwareImpl::Init()
 {
-	Renderer::Settings &settings = Renderer::Instance->settings;
-	backBuffer.width = settings.width;
-	backBuffer.height = settings.height;
-	backBuffer.pitch = settings.width * BYTES_PER_PIXEL;
+	activeSettings = Renderer::Instance->settings;
+	backBuffer.width = activeSettings.width;
+	backBuffer.height = activeSettings.height;
+	backBuffer.pitch = activeSettings.width * BYTES_PER_PIXEL;
 
 	// TODO: MemoryManager reclaim.
 	backBuffer.pixels = MemoryManager::Instance->PartitionBlock(REQUIRED_MEMORY);
@@ -64,7 +64,7 @@ void RenderSoftwareImpl::ProcessCommands(const Renderer::CommandQueue &queue)
 {
 	ProcessCommandsInternal(queue);
 	Flip();
-	if (Renderer::Instance->settings.vSync)
+	if (activeSettings.vSync)
 	{
 		HRESULT hr = DwmFlush();
 		if (FAILED(hr))
@@ -100,8 +100,7 @@ void RenderSoftwareImpl::Blend(u32 *dest, u32 *src, u32 alpha)
 
 void RenderSoftwareImpl::SetPixel(int x, int y, int color)
 {
-	const Renderer::Settings settings = Renderer::Instance->settings;
-	if (x < 0 || x >= settings.width || y < 0 || y >= settings.height)
+	if (x < 0 || x >= activeSettings.width || y < 0 || y >= activeSettings.height)
 	{
 		return;
 	}
@@ -147,10 +146,9 @@ void RenderSoftwareImpl::ExecuteCommand(const Renderer::Command *dc)
 	case Renderer::CMDType::RECTANGLE:
 	{
 		const Renderer::CmdRectangle &rect = dc->rectangle;
-#if true
 		int x0 = rect.x;
 		int x1 = x0 + rect.w;
-		int y0 = rect.y;
+		int y0 = activeSettings.height - rect.y;
 		int y1 = y0 + rect.h;
 		if (rect.center)
 		{
@@ -181,18 +179,6 @@ void RenderSoftwareImpl::ExecuteCommand(const Renderer::Command *dc)
 				}
 			}
 		}
-#else
-		int hw = rect.w / 2;
-		int hh = rect.h / 2;
-		for (int y = -hh; y <= hh; ++y)
-		{
-			for (int x = -hw; x <= hw; ++x)
-			{
-				if (rect.filled || x == -hw || x == hw || y == -hh || y == hh)
-					SetPixel(rect.x + x, rect.y + y, rect.c);
-			}
-		}
-#endif
 	}
 	break;
 
@@ -263,9 +249,6 @@ void RenderSoftwareImpl::ExecuteCommand(const Renderer::Command *dc)
 						if (alpha > 0)
 						{
 							u32 color = text.c; //(text.c & 0x00FFFFFF) | (alpha << 24);
-							// u32 *dst = (u32*)((u8 *)(backBuffer.pixels) + (dst_y * backBuffer.width + dst_x));
-							// TODO: Color
-							// Blend(dst, (u32 *)(bitmap) + row * w + col, alpha);
 							SetPixel(dst_x, backBuffer.height - dst_y, color);
 						}
 					}

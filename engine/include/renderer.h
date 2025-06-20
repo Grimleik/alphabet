@@ -8,6 +8,12 @@
 #include "singleton.h"
 #include "containers.h"
 
+#define AGE_COLOR(r, g, b, a) ((int)(255 * a) << 24 | (int)(255 * r) << 16 | (int)(255 * g) << 8 | (int)(255 * b))
+constexpr u32 AGE_WHITE = AGE_COLOR(1.0, 1.0, 1.0, 1.0);
+constexpr u32 AGE_RED = AGE_COLOR(1.0, 0.0, 0.0, 1.0);
+constexpr u32 AGE_GREEN = AGE_COLOR(0.0, 1.0, 0.0, 1.0);
+constexpr u32 AGE_BLUE = AGE_COLOR(0.0, 0.0, 1.0, 1.0);
+
 class Renderer : public ISingleton
 {
 public:
@@ -114,7 +120,7 @@ public:
 
 	struct Settings
 	{
-		i16 width, height;
+		i32 width, height;
 		bool vSync;
 		bool fullscreen;
 	};
@@ -136,9 +142,10 @@ public:
 	void AddBackend(BACKEND bt, IBackend *bk);
 
 	void PushCmd_ClearScreen(const CmdClearScreen &&csc);
-	CmdRectangle& PushCmd_Rectangle();
+	CmdRectangle &PushCmd_Rectangle();
 	void PushCmd_Rectangle(const CmdRectangle &&rect);
 	void PushCmd_Line(const CmdLine &&line);
+	CmdText& PushCmd_Text();
 	void PushCmd_Text(const CmdText &&text);
 	void PushCmd_Batch(const CmdBatch &batch);
 	void PushCmd_Batch(const CmdBatch &&batch);

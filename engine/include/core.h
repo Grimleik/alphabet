@@ -46,9 +46,21 @@ typedef double f64;
 #error Unsupported Platform.
 #endif
 
-inline int wrap(int value, int max)
+template<typename T>
+inline T wrap(T value, T max)
 {
+	static_assert(std::is_integral<T>::value, "only integral values supported.");
 	return (value + max) % max;
+}
+
+template<typename T>
+inline T clamp(T v, T min, T max)
+{
+	if (v < min)
+		return min;
+	if (v > max)
+		return max;
+	return v;
 }
 
 #endif
