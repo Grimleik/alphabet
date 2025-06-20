@@ -45,7 +45,7 @@ public:
 	{
 		i32 x, y, w, h;
 		u32 c;
-		bool filled;
+		bool filled, center;
 	};
 
 	struct CmdLine
@@ -136,6 +136,7 @@ public:
 	void AddBackend(BACKEND bt, IBackend *bk);
 
 	void PushCmd_ClearScreen(const CmdClearScreen &&csc);
+	CmdRectangle& PushCmd_Rectangle();
 	void PushCmd_Rectangle(const CmdRectangle &&rect);
 	void PushCmd_Line(const CmdLine &&line);
 	void PushCmd_Text(const CmdText &&text);

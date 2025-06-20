@@ -147,6 +147,41 @@ void RenderSoftwareImpl::ExecuteCommand(const Renderer::Command *dc)
 	case Renderer::CMDType::RECTANGLE:
 	{
 		const Renderer::CmdRectangle &rect = dc->rectangle;
+#if true
+		int x0 = rect.x;
+		int x1 = x0 + rect.w;
+		int y0 = rect.y;
+		int y1 = y0 + rect.h;
+		if (rect.center)
+		{
+			x0 -= rect.w / 2;
+			y0 -= rect.h / 2;
+			x1 -= rect.w / 2;
+			y1 -= rect.h / 2;
+		}
+
+		if (rect.filled)
+		{
+			for (int y = y0; y <= y1; ++y)
+			{
+				for (int x = x0; x <= x1; ++x)
+				{
+					SetPixel(x, y, rect.c);
+				}
+			}
+		}
+		else
+		{
+			for (int y = y0; y <= y1; ++y)
+			{
+				for (int x = x0; x <= x1; ++x)
+				{
+					if (x == x0 || x == x1 || y == y0 || y == y1)
+						SetPixel(x, y, rect.c);
+				}
+			}
+		}
+#else
 		int hw = rect.w / 2;
 		int hh = rect.h / 2;
 		for (int y = -hh; y <= hh; ++y)
@@ -157,6 +192,7 @@ void RenderSoftwareImpl::ExecuteCommand(const Renderer::Command *dc)
 					SetPixel(rect.x + x, rect.y + y, rect.c);
 			}
 		}
+#endif
 	}
 	break;
 

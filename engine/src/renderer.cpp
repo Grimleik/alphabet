@@ -33,6 +33,13 @@ void Renderer::PushCmd_ClearScreen(const CmdClearScreen &&csc)
 	cmd.csc = std::move(csc);
 }
 
+Renderer::CmdRectangle &Renderer::PushCmd_Rectangle()
+{
+	Renderer::Command& result = PushCommand();
+	result.type = Renderer::CMDType::RECTANGLE;
+	return result.rectangle;
+}
+
 void Renderer::PushCmd_Rectangle(const CmdRectangle &&rect)
 {
 	Renderer::Command &cmd = PushCommand();

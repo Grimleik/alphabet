@@ -5,6 +5,7 @@
 #include "platform.h"
 #include "singleton.h"
 #include <Windows.h>
+#include <windowsx.h>
 #include <DbgHelp.h>
 #include <string>
 #include <iostream>
@@ -226,7 +227,6 @@ int Platform::Create()
 			LoadGameDLL(winState);
 			AGE_GameInitBinding(&platState, true);
 		}
-
 		AGE_GameUpdateBinding(&platState);
 		Input::Instance->SwapInputBuffer();
 		Renderer::Instance->Flip();
@@ -332,7 +332,7 @@ bool InitializeWindows(WindowsState &state)
 	}
 
 	Renderer::Settings &settings = Renderer::Instance->settings;
-	HWND hwnd = CreateWindowEx(0, CLASS_NAME, "AGEx64", WS_OVERLAPPED| WS_CAPTION | WS_SYSMENU,
+	HWND hwnd = CreateWindowEx(0, CLASS_NAME, "AGEx64", WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU,
 							   CW_USEDEFAULT, CW_USEDEFAULT, settings.width,
 							   settings.height, NULL, NULL, hInstance, NULL);
 
@@ -398,6 +398,34 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 	break;
 
+	case WM_LBUTTONDOWN:
+	{
+		Input::Instance->mouse.lButton = true;
+	}
+	break;
+	case WM_LBUTTONUP:
+	{
+		Input::Instance->mouse.lButton = false;
+	}
+	break;
+
+	case WM_MOUSEMOVE:
+	{
+		Input::Instance->mouse.x = GET_X_LPARAM(lParam);
+		// TODO:
+		// Input::Instance->mouse.y = Renderer::Instance->settings.height - GET_Y_LPARAM(lParam);
+		// TODO: Fetch windows ClientRect
+		RECT rect;
+		if(!GetClientRect(hwnd, &rect)) {
+			AGE_LOG(LOG_LEVEL::WARN, "Unable to fetch Client rect.");
+			break;
+		}
+		// TODO:
+		int offset = Renderer::Instance->settings.height - (rect.bottom - rect.top);
+		AGE_LOG(LOG_LEVEL::INFO, "Offset {}", offset);
+		Input::Instance->mouse.y = GET_Y_LPARAM(lParam) + offset;
+	}
+	break;
 	}
 	if (processKey)
 	{

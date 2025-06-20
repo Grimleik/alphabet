@@ -31,7 +31,14 @@ public:
 		DOWN_ARROW = 116,
 		ENTER = 36,
 		BACKSPACE = 22,
+		Mouse1 = 1, // TODO:
 		COUNT = 256,
+	};
+
+	struct MouseState
+	{
+		bool lButton;
+		f32 x, y;
 	};
 
 	struct KeyBuffer
@@ -46,6 +53,9 @@ public:
 	bool IsKeyDown(KEYS key);
 	bool IsKeyUp(KEYS key);
 	void MarkKey(KEYS key, KEY_STATES state);
+
+	// TODO: Clean up
+	MouseState mouse;
 
 private:
 	constexpr static u16 NR_OF_INPUT_BUFFERS = 3;
